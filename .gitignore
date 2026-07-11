@@ -1,0 +1,59 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+build/
+bld/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userprefs
+*.sln.docstates
+*.vsp
+*.vspx
+*.saplog
+*.svclog
+*.tlog
+*.dll
+*.exe
+*.pdb
+*.cachefile
+*.vsidx
+*.dtbcache.v2
+
+# Rider
+.idea/
+*.sln.iml
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+*.lock.json
+
+# Test results
+TestResults/
+[Tt]est[Rr]esult*/
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+Desktop.ini
