@@ -42,7 +42,7 @@ IndustrialMonitor.slnx
 - [x] 主界面框架（左侧菜单导航、右上角窗口控制）
 - [x] 功能模块页面搭建（监控 / 趋势 / 报警 / 报表 / 配置）
 - [x] 权限控制（非管理员仅可使用监控功能）
-- [x] 通用弹窗与提示（DialogOuterWin / RightRemindWin）
+- [x] 通用弹窗与提示（DialogOuterWin / RightRemindWin，支持背景模糊效果）
 - [x] 公共资源库（字体、图标、按钮 / 表格样式）
 - [x] 序号转换器（RowNumberConverter）
 
