@@ -8,4 +8,19 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.17">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Prism.DryIoc" Version="9.0.537" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IndustrialMonitor.CommonResource\IndustrialMonitor.CommonResource.csproj" />
+    <ProjectReference Include="..\IndustrialMonitor.DBAcess\IndustrialMonitor.DBAcess.csproj" />
+    <ProjectReference Include="..\IndustrialMonitor.Helper\IndustrialMonitor.Helper.csproj" />
+    <ProjectReference Include="..\IndustrialMonitor.Models\IndustrialMonitor.Models.csproj" />
+  </ItemGroup>
+
 </Project>
