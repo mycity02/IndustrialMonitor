@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IndustrialMonitor.CommonResource\IndustrialMonitor.CommonResource.csproj" />
+    <ProjectReference Include="..\IndustrialMonitor.Converter\IndustrialMonitor.Converter.csproj" />
     <ProjectReference Include="..\IndustrialMonitor.DBAcess\IndustrialMonitor.DBAcess.csproj" />
     <ProjectReference Include="..\IndustrialMonitor.Helper\IndustrialMonitor.Helper.csproj" />
     <ProjectReference Include="..\IndustrialMonitor.Models\IndustrialMonitor.Models.csproj" />

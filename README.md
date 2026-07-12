@@ -1,10 +1,10 @@
 # IndustrialMonitor
 
-空压站数字化监控平台 —— 基于 WPF (.NET 10) + Prism 的工业上位机监控软件。
+C# | 工业数字化监控平台 —— 基于 WPF (.NET 10) + Prism 的工业上位机监控软件。
 
 ## 项目简介
 
-本项目是一个用于学习工业上位机开发的 WPF 应用程序。系统采用 Prism + 模块化分层架构，目前已完成登录认证与 MySQL 数据持久化基础，后续将逐步扩展设备通信、实时数据展示、报警与历史记录等功能。
+本项目是一个用于学习工业上位机开发的 WPF 应用程序。系统采用 Prism + 模块化分层架构，目前已完成登录认证、主界面框架、左侧菜单导航与 MySQL 数据持久化，功能模块页面已搭建，后续将逐步填充实时数据、趋势、报警、报表等业务逻辑。
 
 ## 技术栈
 
@@ -20,31 +20,40 @@
 ```
 IndustrialMonitor.slnx
 ├── IndustrialMonitor/                  WPF 主程序入口（PrismApplication / Views / ViewModels）
+│   ├── Views/                          视图（LoginView / MainUCView / FunctionUC / DialogWin）
+│   └── ViewModels/                     视图模型（LoginViewModel / MainUCViewModel）
 ├── IndustrialMonitor.Models/           数据传输模型（DTO / ViewModel）
 ├── IndustrialMonitor.DataEntities/     实体类（与数据库表对应）
-├── IndustrialMonitor.DBAcess/          数据访问层（DbContext / IDataAccess）
+├── IndustrialMonitor.DBAcess/          数据访问层（DbContext / IDataAccess / Migrations）
 ├── IndustrialMonitor.DeviceAccess/     设备通信层（PLC / 仪器仪表读写）
 ├── IndustrialMonitor.CommonResource/   公共资源（字体、图片、样式）
 ├── IndustrialMonitor.Compenents/       自定义 UI 组件
 ├── IndustrialMonitor.Converter/        XAML 值转换器
-└── IndustrialMonitor.Helper/           通用帮助类（MD5、密码框附加属性等）
+└── IndustrialMonitor.Helper/           通用帮助类（MD5、密码框附加属性、ActionHelper 等）
 ```
 
 ## 当前已完成功能
 
 - [x] 解决方案分层结构搭建
-- [x] 引入 Prism 9 框架（PrismApplication、ViewModelLocator、DelegateCommand）
+- [x] 引入 Prism 9 框架（PrismApplication、ViewModelLocator、DelegateCommand、DialogService）
 - [x] MySQL 数据库接入（EF Core 9 + Pomelo）
-- [x] 登录认证模块（账号密码校验、MD5 加密）
+- [x] 登录认证模块（账号密码校验、MD5 加密、登录成功后打开主界面）
 - [x] 自定义密码框附加属性（支持双向绑定）
-- [x] 公共资源库（字体、图标、按钮样式）
+- [x] 主界面框架（左侧菜单导航、右上角窗口控制）
+- [x] 功能模块页面搭建（监控 / 趋势 / 报警 / 报表 / 配置）
+- [x] 权限控制（非管理员仅可使用监控功能）
+- [x] 通用弹窗与提示（DialogOuterWin / RightRemindWin）
+- [x] 公共资源库（字体、图标、按钮 / 表格样式）
+- [x] 序号转换器（RowNumberConverter）
 
 ## 待实现功能
 
-- [ ] 主窗口框架与区域导航
+- [ ] 监控模块实时数据展示
+- [ ] 趋势模块历史曲线
+- [ ] 报警模块报警记录与处理
+- [ ] 报表模块数据导出
+- [ ] 配置模块参数设置
 - [ ] 设备通信模块（串口 / TCP / Modbus）
-- [ ] 实时数据展示（曲线、仪表盘）
-- [ ] 报警与历史记录
 - [ ] SignalR 实时消息推送
 
 ## 环境要求
@@ -88,3 +97,7 @@ dotnet build
 # 运行主程序
 dotnet run --project IndustrialMonitor
 ```
+
+## 默认登录账号
+
+可在数据库 `monitor_SysUsers` 表中预置账号，默认测试账号可在登录窗口直接输入（具体以实际数据为准）。
