@@ -57,3 +57,6 @@ coverage*.info
 Thumbs.db
 .DS_Store
 Desktop.ini
+
+# Merge backup files
+*.orig

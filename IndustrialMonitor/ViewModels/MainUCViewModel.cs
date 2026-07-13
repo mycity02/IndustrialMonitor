@@ -94,12 +94,11 @@ namespace IndustrialMonitor.ViewModels
                 MenuList[0].IsSelected = true;//没有权限，默认还是选择监控功能
                 RightRemindWin rightRemindWin = new RightRemindWin();
                 bool? dialogResult = rightRemindWin.ShowDialog();
-                //if (ActionHelper.ExecuteAndResult<object>("ShowRight", null))
-                //{
-                //    //重新登录
-                //    DoReLogin();
-                //}
-                DoReLogin();
+                if (ActionHelper.ExecuteAndResult<object>("ShowRight", null))
+                {
+                    //重新登录
+                    DoReLogin();
+                }
             }
             else
             {

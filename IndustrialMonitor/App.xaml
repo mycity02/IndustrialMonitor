@@ -10,7 +10,7 @@
                     <FontFamily x:Key="Iconfont">
                         pack://application:,,,/IndustrialMonitor.CommonResource;component/Fonts/#iconfont
                     </FontFamily>
-                    <FontFamily x:Key="DigitalDiaplay">
+                    <FontFamily x:Key="DigitalDisplay">
                         pack://application:,,,/IndustrialMonitor.CommonResource;component/Fonts/#DigitalDisplay
                     </FontFamily>
                 </ResourceDictionary>
