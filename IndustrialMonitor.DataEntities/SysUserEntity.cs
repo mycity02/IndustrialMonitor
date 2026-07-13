@@ -2,52 +2,52 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Platform.DataEntities
+namespace IndustrialMonitor.DataEntities
 {
     /// <summary>
-    /// ÏµÍ³ÓÃ»§±í
+    /// ÏµÍ³ï¿½Ã»ï¿½ï¿½ï¿½
     /// </summary>
     [Table("monitor_SysUsers")]
     public class SysUserEntity
     {
         /// <summary>
-        /// ÓÃ»§ID
+        /// ï¿½Ã»ï¿½ID
         /// </summary>
         [Key]
         public int UserId { get; set; }
 
         /// <summary>
-        /// µÇÂ¼ÕËºÅ
+        /// ï¿½ï¿½Â¼ï¿½Ëºï¿½
         /// </summary>
         public string Account { get; set; }
 
         /// <summary>
-        /// ÃÜÂë(´æÃÜÎÄ)
+        /// ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
         /// </summary>
         public string Password { get; set; }
 
         /// <summary>
-        /// ÊÇ·ñ¹ÜÀíÔ±
+        /// ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ô±
         /// </summary>
         public bool IsAdmin { get; set; }
 
         /// <summary>
-        /// ÕæÊµÐÕÃû
+        /// ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½
         /// </summary>
         public string RealName { get; set; }
 
         /// <summary>
-        /// ÐÔ±ð
+        /// ï¿½Ô±ï¿½
         /// </summary>
         public bool Gender { get; set; } = true;
 
         /// <summary>
-        /// ÊÖ»úºÅ
+        /// ï¿½Ö»ï¿½ï¿½ï¿½
         /// </summary>
         public string Phone { get; set; } = "";
 
         /// <summary>
-        /// ²¿ÃÅ
+        /// ï¿½ï¿½ï¿½ï¿½
         /// </summary>
         public string Department { get; set; }
     }

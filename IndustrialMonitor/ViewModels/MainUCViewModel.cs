@@ -1,4 +1,5 @@
-﻿using IndustrialMonitor.Helper;
+﻿using IndustrialMonitor.DBAcess;
+using IndustrialMonitor.Helper;
 using IndustrialMonitor.Models.Models;
 using IndustrialMonitor.Views.DialogWin;
 using Platform.Helper;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace IndustrialMonitor.ViewModels
@@ -17,6 +19,12 @@ namespace IndustrialMonitor.ViewModels
         public SysUserModel LoginUserModel { get; set; }
         public string Title { get; set; } = "主界面";
         public DialogCloseListener RequestClose { get; } = new();
+        private IDataAccess _dataAccess;
+
+        public MainUCViewModel(IDataAccess dataAccess)
+        {
+            _dataAccess = dataAccess;
+        }
 
         public bool CanCloseDialog()
         {
@@ -113,6 +121,7 @@ namespace IndustrialMonitor.ViewModels
         }
         #endregion
 
+        #region
         /// <summary>
         /// 重新登录
         /// </summary>
@@ -121,5 +130,32 @@ namespace IndustrialMonitor.ViewModels
             Process.Start("IndustrialMonitor.exe");
             App.Current.Shutdown();
         }
+
+        /// <summary>
+        /// 退出登录
+        /// </summary>
+        public DelegateCommand LogoutCommand => new DelegateCommand(DoReLogin);
+
+        /// <summary>
+        /// 重置密码
+        /// </summary>
+        public DelegateCommand ResetPwdCommand => new DelegateCommand(() =>
+        {
+            if (MessageBox.Show("确定重置密码吗？", "温馨提示", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                string newPwd = Md5Hepler.ComputeMD5Hash("123456");//将密码重置为123456
+                int result = _dataAccess.ResetPassword(LoginUserModel.UserId, newPwd);
+                if (result == 1)
+                {
+                    MessageBox.Show("重置密码成功");
+                }
+                else
+                {
+                    MessageBox.Show("重置密码失败");
+                }
+            }
+        });
+
+        #endregion
     }
 }

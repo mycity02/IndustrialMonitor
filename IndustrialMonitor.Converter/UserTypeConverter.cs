@@ -20,6 +20,14 @@ namespace IndustrialMonitor.Converter
             return isAdmin ? "管理员" : "非管理员";
         }
 
+        /// <summary>
+        /// 将界面值转换为后端的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="targetType"></param>
+        /// <param name="parameter"></param>
+        /// <param name="culture"></param>
+        /// <returns></returns>
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return null;

@@ -1,5 +1,6 @@
 ﻿using IndustrialMonitor.Helper;
 using IndustrialMonitor.Views.DialogWin;
+using IndustrialMonitor.Views.ComponentWin;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -27,6 +28,8 @@ namespace IndustrialMonitor.Views
 
             //注册显示权限提示界面
             ActionHelper.Register<object>("ShowRight", ShowRightView);
+            //打开链路编辑界面
+            ActionHelper.Register<object>("ComponentsEdit", ShowComponentsEditView);
         }
 
         /// <summary>
@@ -51,6 +54,16 @@ namespace IndustrialMonitor.Views
             bool dialogResult = (dialogWindow.ShowDialog() == true);
             this.Effect = null;//清晰
             return dialogResult;
+        }
+
+        /// <summary>
+        /// 打开链路编辑界面
+        /// </summary>
+        /// <param name="obj">一般是弹窗的DataContext</param>
+        /// <returns>弹窗的DailogResult</returns>
+        private bool ShowComponentsEditView(object obj)
+        {
+            return ShowDialog(new ComponentEditWin());
         }
 
         /// <summary>
