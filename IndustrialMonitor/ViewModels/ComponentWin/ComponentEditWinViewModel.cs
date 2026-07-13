@@ -55,7 +55,7 @@ namespace IndustrialMonitor.ViewModels.ComponentWin
                     Children = comEntity.Select(com => new ComponentModel
                     {
                         ComponentId = com.ComponentId,
-                        Icon = "pack://application:,,,/Platform.CommonResource;component/Images/Components/" + com.Icon,
+                        Icon = "pack://application:,,,/IndustrialMonitor.CommonResource;component/Images/Components/" + com.Icon,
                         ComponentName = com.ComponentName,
                         ComponentType = com.ComponentType,
                         Width = com.Width,

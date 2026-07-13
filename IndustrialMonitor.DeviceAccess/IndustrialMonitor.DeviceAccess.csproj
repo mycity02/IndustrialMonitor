@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
@@ -7,4 +7,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-</Project>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="10.0.9" />
+    <ProjectReference Include="..\IndustrialMonitor.DataEntities\IndustrialMonitor.DataEntities.csproj" />
+  </ItemGroup></Project>

@@ -60,19 +60,52 @@ namespace IndustrialMonitor.Converter
             }
             #endregion
 
-            var assembly = Assembly.Load("IndustrialMonitor.Components");
-            Type t = assembly.GetType("IndustrialMonitor.Components." + value.ToString());
-            var obj = Activator.CreateInstance(t);
-
             #region 宽/高 对齐线
-            if (new string[] { "HeightRule", "WidthRule" }.Contains(value.ToString()))
+            if (value?.ToString() == "WidthRule")
             {
-                return obj;
+                return new Line
+                {
+                    X1 = 0,
+                    Y1 = 0,
+                    X2 = 2000,
+                    Y2 = 0,
+                    Stroke = Brushes.Red,
+                    StrokeThickness = 1,
+                    StrokeDashArray = new DoubleCollection { 3, 3 },
+                    ClipToBounds = true,
+                };
+            }
+
+            if (value?.ToString() == "HeightRule")
+            {
+                return new Line
+                {
+                    X1 = 0,
+                    Y1 = 0,
+                    X2 = 0,
+                    Y2 = 2000,
+                    Stroke = Brushes.Red,
+                    StrokeThickness = 1,
+                    StrokeDashArray = new DoubleCollection { 3, 3 },
+                    ClipToBounds = true,
+                };
             }
             #endregion
 
-            var c = (ComponentBase)obj;
+            if (value == null)
+            {
+                return DependencyProperty.UnsetValue;
+            }
 
+            var assembly = Assembly.Load("IndustrialMonitor.Compenents");
+            Type t = assembly.GetType("IndustrialMonitor.Components." + value);
+            if (t == null)
+            {
+                return DependencyProperty.UnsetValue;
+            }
+
+            var obj = Activator.CreateInstance(t);
+            var c = (ComponentBase)obj;
             #region 删除
             //绑定
             //<DeleteCommand={bing DeleteModelCommand}> DeleteParameterProperty={binding}

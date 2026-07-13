@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -23,6 +23,7 @@
     <ProjectReference Include="..\IndustrialMonitor.Compenents\IndustrialMonitor.Compenents.csproj" />
     <ProjectReference Include="..\IndustrialMonitor.Converter\IndustrialMonitor.Converter.csproj" />
     <ProjectReference Include="..\IndustrialMonitor.DBAcess\IndustrialMonitor.DBAcess.csproj" />
+    <ProjectReference Include="..\IndustrialMonitor.DeviceAccess\IndustrialMonitor.DeviceAccess.csproj" />
     <ProjectReference Include="..\IndustrialMonitor.Helper\IndustrialMonitor.Helper.csproj" />
     <ProjectReference Include="..\IndustrialMonitor.Models\IndustrialMonitor.Models.csproj" />
   </ItemGroup>

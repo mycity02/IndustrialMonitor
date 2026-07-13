@@ -1,4 +1,6 @@
-using IndustrialMonitor.DataEntities;
+﻿using IndustrialMonitor.DataEntities;
+using IndustrialMonitor.DeviceAccess;
+using IndustrialMonitor.DeviceAccess.Base;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
