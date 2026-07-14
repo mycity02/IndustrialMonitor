@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IndustrialMonitor.Models
+namespace IndustrialMonitor.Models.Models
 {
     /// <summary>
     /// 用气量排行

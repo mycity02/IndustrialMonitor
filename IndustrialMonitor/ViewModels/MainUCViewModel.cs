@@ -3,12 +3,10 @@ using IndustrialMonitor.DBAcess;
 using IndustrialMonitor.DeviceAccess;
 using IndustrialMonitor.DeviceAccess.Base;
 using IndustrialMonitor.Helper;
-using IndustrialMonitor.Models;
+using IndustrialMonitor.Logger;
 using IndustrialMonitor.Models.Models;
 using IndustrialMonitor.Views.DialogWin;
 using LiveCharts;
-using Platform.Helper;
-using Platform.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,20 +22,51 @@ namespace IndustrialMonitor.ViewModels
 {
     public class MainUCViewModel : BindableBase, IDialogAware
     {
-        public SysUserModel LoginUserModel { get; set; }
+        private readonly IDataAccess _dataAccess;
+        private readonly ILoggerService<MainUCViewModel> _loggerService;
+
+        public SysUserModel LoginUserModel { get; set; } = new();
         public string Title { get; set; } = "主界面";
         public DialogCloseListener RequestClose { get; } = new();
-        private IDataAccess _dataAccess;
 
-        public MainUCViewModel(IDataAccess dataAccess)
+        public MainUCViewModel(
+            IDataAccess dataAccess,
+            IEventAggregator eventAggregator,
+            ILoggerService<MainUCViewModel> loggerService)
         {
             _dataAccess = dataAccess;
+            _loggerService = loggerService;
 
-            //初始化设备
             InitHadDevices();
-
-            //直接连接PLC设备监控
             Monitor();
+
+            Task.Run(async () =>
+            {
+                while (!cts.IsCancellationRequested)
+                {
+                    await Task.Delay(2000, cts.Token);
+                    AlarmDeviceCount = DeviceList.Count(d => d.IsWarning);
+                }
+            }, cts.Token);
+
+            InitSevenPower();
+            InitSevenAir();
+            InitSevenLeak();
+            InitAirRanking();
+            InitDeviceWarning();
+            InitMonitorSettingVar();
+
+            eventAggregator.GetEvent<HandleAlarmEvent>().Subscribe(HandleDeviceAlarm);
+            _loggerService.Info("主监控模块初始化完成");
+        }
+
+        private void HandleDeviceAlarm(string deviceNum)
+        {
+            var device = DeviceList.FirstOrDefault(d => d.DeviceNum == deviceNum);
+            if (device != null)
+            {
+                device.IsWarning = false;
+            }
         }
 
         public bool CanCloseDialog()
@@ -529,8 +558,7 @@ namespace IndustrialMonitor.ViewModels
                                 {
                                     if (!deviceVarModel.ReadValue.Equals(oldReadValue))//值与之前不一样才写
                                     {
-                                        _dataAccess.SaveMonitorRecords(new List<MonitorRecordEntity>
-                                        {
+                                        MonitorRecordOperation.SaveRecords(_dataAccess,
                                             new MonitorRecordEntity
                                             {
                                                 DeviceNum = deviceModel.DeviceNum,
@@ -540,16 +568,12 @@ namespace IndustrialMonitor.ViewModels
                                                 RecordValue = Convert.ToDecimal(deviceVarModel.ReadValue),
                                                 Account = LoginUserModel.Account,
                                                 AlarmNum = alarmNum,
-                                            }
-                                        });
+                                            });
                                     }
                                 }
                                 #endregion
 
-                                #region 监控数据上云
-                                // MQTT 上云尚未配置服务地址、账号和客户端连接；暂不发布。
-                                // 配置完成后，在此处通过已连接的 MQTT 客户端发布监控数据。
-                                #endregion
+
                             }
                         }
 

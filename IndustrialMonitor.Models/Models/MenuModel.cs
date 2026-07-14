@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace Platform.Models
+namespace IndustrialMonitor.Models.Models
 {
     /// <summary>
     /// 主界面左侧菜单模型

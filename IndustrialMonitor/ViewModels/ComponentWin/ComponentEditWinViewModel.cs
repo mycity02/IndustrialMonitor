@@ -2,7 +2,6 @@
 using IndustrialMonitor.DBAcess;
 using IndustrialMonitor.DataEntities;
 using IndustrialMonitor.Helper;
-using IndustrialMonitor.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

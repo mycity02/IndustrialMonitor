@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Platform.Helper
+namespace IndustrialMonitor.Helper
 {
     /// <summary>
     /// md5工具类

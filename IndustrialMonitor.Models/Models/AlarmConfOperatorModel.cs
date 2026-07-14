@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IndustrialMonitor.Models
+namespace IndustrialMonitor.Models.Models
 {
     /// <summary>
     /// 运算模型
