@@ -4,12 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IndustrialMonitor.Views.DialogWin"
-        xmlns:converter="clr-namespace:IndustrialMonitor.Converter;assembly=IndustrialMonitor.Converter"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         FontFamily="Microsoft YaHei" FontWeight="ExtraLight" FontSize="12"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-        Title="变量报警条件配置" Height="400" Width="650">
+        Title="趋势变量配置" Height="400" Width="650">
 
     <WindowChrome.WindowChrome>
         <WindowChrome GlassFrameThickness="1"/>
@@ -21,8 +20,6 @@
                 <ResourceDictionary Source="pack://application:,,,/IndustrialMonitor.CommonResource;component/Styles/ButtonStyles.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/IndustrialMonitor.CommonResource;component/Styles/ComboBoxStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <converter:RowNumberConverter x:Key="rnc"/>
 
             <Style TargetType="TextBox">
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -112,26 +109,23 @@
             <Border Background="#9FFF" Grid.Row="1"/>
             <Grid TextBlock.Foreground="White">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="30"/>
                     <ColumnDefinition/>
                     <ColumnDefinition Width="50"/>
                     <ColumnDefinition Width="110"/>
                     <ColumnDefinition Width="40"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="序号" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <TextBlock Text="纵轴基本信息" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Text="纵轴基本信息" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
-                <TextBlock Text="间隔线" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <TextBlock Text="预警线" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <TextBlock Text="操作" Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Text="间隔线" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Text="预警线" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Text="操作" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center"/>
             </Grid>
 
-            <ItemsControl Grid.Row="1" ItemsSource="{Binding Trend.AxisList}" AlternationCount="1000">
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding Trend.AxisList}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="30"/>
                                 <ColumnDefinition/>
                                 <ColumnDefinition Width="50"/>
                                 <ColumnDefinition Width="110"/>
@@ -141,27 +135,25 @@
                                 <RowDefinition Height="30"/>
                                 <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
-                            <Border Background="#EEE" Grid.Row="1" Height="1" Grid.ColumnSpan="5" VerticalAlignment="Bottom"/>
-                            <!--序号-->
-                            <TextBlock Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource AncestorType=ContentPresenter}, Converter={StaticResource rnc}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <Border Background="#EEE" Grid.Row="1" Height="1" Grid.ColumnSpan="4" VerticalAlignment="Bottom"/>
 
                             <!--纵轴的基本信息-->
-                            <TextBlock Text="纵轴名称/显示" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0"/>
-                            <TextBox Text="{Binding Title}" Grid.Column="1" Margin="88,0,5,0" VerticalAlignment="Center"/>
-                            <CheckBox IsChecked="{Binding IsShowTitle}" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0"/>
-                            <CheckBox IsChecked="{Binding IsShowSeperator}" Grid.Column="2" Grid.RowSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBlock Text="纵轴名称/显示" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0"/>
+                            <TextBox Text="{Binding Title}" Margin="88,0,5,0" VerticalAlignment="Center"/>
+                            <CheckBox IsChecked="{Binding IsShowTitle}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0"/>
+                            <CheckBox IsChecked="{Binding IsShowSeperator}" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
                             <!--预警线的列表 下拉-->
-                            <ToggleButton Grid.Column="3" Grid.RowSpan="2" Height="28" Style="{StaticResource ChooseButtonStlye}" Content="{Binding SectionValues}" Name="btnWarning"/>
+                            <ToggleButton Grid.Column="2" Grid.RowSpan="2" Height="28" Style="{StaticResource ChooseButtonStlye}" Content="{Binding SectionValues}" Name="btnWarning"/>
 
                             <!--删除纵轴-->
-                            <TextBlock Grid.Column="4" Grid.RowSpan="2" FontFamily="{StaticResource Iconfont}" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Grid.Column="3" Grid.RowSpan="2" FontFamily="{StaticResource Iconfont}" VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Hyperlink TextDecorations="None" CommandParameter="{Binding}" Command="{Binding DataContext.Trend.DeleteAxisCommand,RelativeSource={RelativeSource AncestorType=Window}}">&#xe653;</Hyperlink>
                             </TextBlock>
 
 
                             <!--纵轴的更多信息-->
-                            <Grid Grid.Row="1" Grid.Column="1" Margin="0,2">
+                            <Grid Grid.Row="1" Margin="0,2">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="45"/>
                                     <ColumnDefinition/>

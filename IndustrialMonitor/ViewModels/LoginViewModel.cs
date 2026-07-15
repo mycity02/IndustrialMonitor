@@ -1,76 +1,68 @@
-﻿using IndustrialMonitor.DBAcess;
-using IndustrialMonitor.Models.Models;
+using IndustrialMonitor.DBAcess;
 using IndustrialMonitor.Helper;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows;
+using IndustrialMonitor.Logger;
+using IndustrialMonitor.Models.Models;
+using IndustrialMonitor.Services;
 
-namespace IndustrialMonitor.ViewModels
+namespace IndustrialMonitor.ViewModels;
+
+public sealed class LoginViewModel : BindableBase
 {
-    /// <summary>
-    /// 登录视图模型
-    /// </summary>
-    public class LoginViewModel : BindableBase
+    private readonly IDataAccess _dataAccess;
+    private readonly IDialogService _dialogService;
+    private readonly ILoggerService<LoginViewModel> _logger;
+    private readonly IWindowService _windowService;
+
+    private string _loginErrorMsg = string.Empty;
+
+    public SysUserModel SysUser { get; } = new();
+
+    public string LoginErrorMsg
     {
-        private readonly IDataAccess _dataAccess;
-        private readonly IDialogService _dialogService;
-        public SysUserModel SysUser { get; set; } = new();
-        public LoginViewModel(IDataAccess dataAccess, IDialogService dialogService) 
+        get => _loginErrorMsg;
+        private set => SetProperty(ref _loginErrorMsg, value);
+    }
+
+    public DelegateCommand LoginCommand { get; }
+
+    public LoginViewModel(
+        IDataAccess dataAccess,
+        IDialogService dialogService,
+        ILoggerService<LoginViewModel> logger,
+        IWindowService windowService)
+    {
+        _dataAccess = dataAccess;
+        _dialogService = dialogService;
+        _logger = logger;
+        _windowService = windowService;
+        LoginCommand = new DelegateCommand(Login);
+    }
+
+    private void Login()
+    {
+        if (string.IsNullOrWhiteSpace(SysUser.Account) || string.IsNullOrWhiteSpace(SysUser.Password))
         {
-            _dataAccess = dataAccess;
-            _dialogService = dialogService;
+            LoginErrorMsg = "账号和密码不能为空";
+            _logger.Warn("登录失败：账号或密码为空");
+            return;
         }
 
-        #region 登录结果
-        private string _loginErrorMsg;
-
-        public string LoginErrorMsg
+        string passwordHash = Md5Hepler.ComputeMD5Hash(SysUser.Password);
+        var loginUser = _dataAccess.Login(SysUser.Account, passwordHash);
+        if (loginUser == null)
         {
-            get => _loginErrorMsg;
-            set
-            {
-                SetProperty(ref _loginErrorMsg, value);
-            }
+            LoginErrorMsg = "账号或密码错误";
+            _logger.Warn($"登录失败：账号 {SysUser.Account}");
+            return;
         }
-        #endregion
 
-        #region 登录
-        public DelegateCommand<Window> LoginCommand => new DelegateCommand<Window>(LoginSystem);
+        _logger.Info($"用户 {loginUser.Account} 登录成功");
+        _windowService.HideActiveWindow();
 
-        private void LoginSystem(Window loginView)
+        var parameters = new DialogParameters
         {
-            if (string.IsNullOrEmpty(SysUser.Account) || string.IsNullOrEmpty(SysUser.Password))
-            {
-                LoginErrorMsg = "账号和密码不能为空";
-            }
-
-            string md5Pwd = Md5Hepler.ComputeMD5Hash(SysUser.Password);
-            var loginUser = _dataAccess.Login(SysUser.Account, md5Pwd);
-            if (loginUser == null)
-            {
-                LoginErrorMsg = "账号或密码错误";
-                return;
-            }
-
-            // 登录成功隐藏登录窗体
-            loginView.Hide();
-
-            #region 将登录信息传递给主界面
-            DialogParameters dialogParameters = new DialogParameters();
-
-            dialogParameters.Add("LoginUser", new SysUserModel
-            {
-                UserId = loginUser.UserId,
-                RealName = loginUser.RealName,
-                Department = loginUser.Department,
-                Account = loginUser.Account,
-                IsAdmin = loginUser.IsAdmin
-            });
-
-            _dialogService.ShowDialog("MainUCView", dialogParameters);
-            #endregion
-        }
-        #endregion
+            { "LoginUser", new SysUserModel { Account = loginUser.Account } }
+        };
+        _dialogService.ShowDialog("MainUCView", parameters);
     }
 }

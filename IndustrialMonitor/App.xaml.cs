@@ -1,50 +1,38 @@
-﻿using IndustrialMonitor.DBAcess;
+using IndustrialMonitor.DBAcess;
 using IndustrialMonitor.Logger;
+using IndustrialMonitor.Services;
 using IndustrialMonitor.ViewModels;
+using IndustrialMonitor.ViewModels.FunctionUC;
 using IndustrialMonitor.Views;
-using System.Configuration;
-using System.Data;
 using System.Windows;
 
-namespace IndustrialMonitor
+namespace IndustrialMonitor;
+
+public partial class App : PrismApplication
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : PrismApplication
+    protected override Window CreateShell() => Container.Resolve<LoginView>();
+
+    protected override void RegisterTypes(IContainerRegistry containerRegistry)
     {
-        protected override Window CreateShell()
-        {
-            // 启动页面
-            return Container.Resolve<LoginView>();
-        }
+        containerRegistry.Register<IDataAccess, DataAccess>();
+        containerRegistry.RegisterSingleton<IWindowService, WindowService>();
+        containerRegistry.RegisterSingleton<MainUCViewModel>();
+        containerRegistry.RegisterSingleton<TrendUCViewModel>();
+        containerRegistry.Register(typeof(ILoggerService<>), typeof(NLogLoggerService<>));
 
-        protected override void RegisterTypes(IContainerRegistry containerRegistry)
-        {
-            containerRegistry.RegisterSingleton<MainUCViewModel>();
-
-            // 注册数据访问
-            containerRegistry.Register<IDataAccess, DataAccess>();
-            // 注册主窗体对话框
-            containerRegistry.RegisterDialog<MainUCView>();
-            
-            containerRegistry.RegisterDialogWindow<DialogOuterWin>();
-
-            containerRegistry.Register(typeof(ILoggerService<>), typeof(NLogLoggerService<>));
-        }
-
-        protected override void OnExit(ExitEventArgs e)
-        {
-            try
-            {
-                var dataAccess = Container.Resolve<IDataAccess>();
-                MonitorRecordOperation.SaveRecords(dataAccess, null);
-            }
-            finally
-            {
-                base.OnExit(e);
-            }
-        }
+        containerRegistry.RegisterDialog<MainUCView>();
+        containerRegistry.RegisterDialogWindow<DialogOuterWin>();
     }
 
+    protected override void OnExit(ExitEventArgs eventArgs)
+    {
+        try
+        {
+            MonitorRecordBuffer.Flush(Container.Resolve<IDataAccess>());
+        }
+        finally
+        {
+            base.OnExit(eventArgs);
+        }
+    }
 }

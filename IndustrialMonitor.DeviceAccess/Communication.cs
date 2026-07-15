@@ -1,137 +1,147 @@
-﻿using IndustrialMonitor.DataEntities;
+using IndustrialMonitor.DataEntities;
 using IndustrialMonitor.DeviceAccess.Base;
 using IndustrialMonitor.DeviceAccess.Execute;
 using IndustrialMonitor.DeviceAccess.Transfer;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace IndustrialMonitor.DeviceAccess
+namespace IndustrialMonitor.DeviceAccess;
+
+/// <summary>
+/// 根据设备配置创建 Modbus 执行对象，并复用相同的物理连接。
+/// </summary>
+public sealed class Communication
 {
-    /// <summary>
-    /// 通信类。提供通信执行对象
-    /// </summary>
-    public class Communication
+    private static readonly Lazy<Communication> Instance = new(() => new Communication());
+    private readonly Dictionary<string, TransferObject> _transfers =
+        new(StringComparer.OrdinalIgnoreCase);
+    private readonly object _transferLock = new();
+
+    private Communication()
     {
-        //单例
-        #region 单例处理
-        private static Communication _instance;
-        private static object _lock = new object();
+    }
 
-        /// <summary>
-        /// 创建实例
-        /// </summary>
-        /// <returns></returns>
-        public static Communication CreateInstance()
+    public static Communication CreateInstance() => Instance.Value;
+
+    /// <summary>
+    /// 创建设备通信对象。协议选择在这里完成，不再让各个类相互“匹配”。
+    /// </summary>
+    public ResultData<ExecuteObject> GetExecuteObject(
+        List<DevicePropEntity> deviceProperties)
+    {
+        string? protocol = GetProperty(deviceProperties, "Protocol");
+        TransferObject candidate = protocol?.ToUpperInvariant() switch
         {
-            if (_instance == null)
-            {
-                lock (_lock)
-                {
-                    _instance = new Communication();
-                }
-            }
-            return _instance;
-        }
-        #endregion
+            "MODBUSRTU" => new SerialUnit(),
+            "MODBUSTCP" => new SocketTcpUnit(),
+            null or "" => null!,
+            _ => null!
+        };
 
-        /// <summary>
-        /// 匹配结果
-        /// </summary>
-
-        private List<TransferObject> TransferObjects = new List<TransferObject>();
-        //监控 串口 Connect COM1
-        //远程启动 串口 Connect COM1
-        //监控 远程启动不是同一个通信(Communication)对象
-
-        /// <summary>
-        /// 根据设备属性获取通信执行对象
-        /// </summary>
-        /// <param name="devicePropList">设备属性</param>
-        /// <returns>通信执行对象</returns>
-        public ResultData<ExecuteObject> GetExecuteObject(List<DevicePropEntity> devicePropList)
+        if (candidate == null)
         {
-            ResultData<ExecuteObject> result = new ResultData<ExecuteObject>();//返回结果
-
-            var protocol = devicePropList.FirstOrDefault(p => p.PropName == "Protocol");
-            if (protocol == null)
-            {
-                result.Status = false;//有错
-                result.Msg = "没有配置协议";
-
-                return result;
-            }
-
-            Type type = Assembly.Load("IndustrialMonitor.DeviceAccess").GetType($"IndustrialMonitor.DeviceAccess.Execute.{protocol.PropValue}");
-            if (type == null)
-            {
-                result.Status = false;//有错
-                result.Msg = "没有找到执行对象";
-
-                return result;
-            }
-
-            ExecuteObject eo = Activator.CreateInstance(type) as ExecuteObject;
-
-            Result reaultMatch = eo.Match(devicePropList, TransferObjects);
-            if (!reaultMatch.Status)
-            {
-                result.Status = false;
-                result.Msg = reaultMatch.Msg;
-
-                return result;
-            }
-
-            result.Status = true;
-            result.Msg = "没有错误";
-            result.Data = eo;
-
-            return result;
+            return FailExecute(string.IsNullOrWhiteSpace(protocol)
+                ? "没有配置通信协议"
+                : $"不支持通信协议：{protocol}");
         }
 
-        /// <summary>
-        /// 将字节数组转成Type
-        /// </summary>
-        /// <param name="valueBytes">字节数组</param>
-        /// <param name="type">类型</param>
-        /// <returns>结果</returns>
-        public ResultData<object> ConvertType(byte[] valueBytes, Type type)
+        Result configResult = candidate.Config(deviceProperties);
+        if (!configResult.Status)
         {
-            ResultData<object> result = new ResultData<object> { Status = true, Msg = "转换数据成功" };
+            return FailExecute(configResult.Msg);
+        }
 
-            try
+        TransferObject transfer;
+        lock (_transferLock)
+        {
+            if (!_transfers.TryGetValue(candidate.ConnectionKey, out transfer!))
             {
-                if (type == typeof(bool))
-                {
-                    result.Data = (valueBytes[0] == 0x01);
-                }
-                else if (type == typeof(string))
-                {
-                    result.Data = Encoding.UTF8.GetString(valueBytes);
-                }
-                else
-                {
-                    // 这里不需要字节调整  默认小端
-                    Type tBitConverter = typeof(BitConverter);
-                    MethodInfo method = tBitConverter.GetMethods(BindingFlags.Public | BindingFlags.Static)
-                        .FirstOrDefault(mi => mi.ReturnType == type && mi.GetParameters().Length == 2) as MethodInfo;
-                    if (method == null)
-                    {
-                        throw new Exception("未找到匹配的数据类型转换方法");
-                    }
+                transfer = candidate;
+                _transfers.Add(transfer.ConnectionKey, transfer);
+            }
+        }
 
-                    result.Data = method?.Invoke(tBitConverter, new object[] { valueBytes.ToArray(), 0 });
-                }
-            }
-            catch (Exception ex)
-            {
-                result.Status = false;
-                result.Msg = ex.Message;
-            }
-            return result;
+        ExecuteObject executeObject = protocol!.Equals(
+            "ModbusRTU",
+            StringComparison.OrdinalIgnoreCase)
+            ? new ModbusRTU(transfer, deviceProperties)
+            : new ModbusTCP(transfer, deviceProperties);
+
+        return new ResultData<ExecuteObject>
+        {
+            Status = true,
+            Msg = "通信对象创建成功",
+            Data = executeObject
+        };
+    }
+
+    /// <summary>
+    /// 关闭并清空全部共享连接。重新加载设备配置时会创建全新的连接。
+    /// </summary>
+    public async Task DisconnectAllAsync()
+    {
+        TransferObject[] transfers;
+        lock (_transferLock)
+        {
+            transfers = _transfers.Values.ToArray();
+            _transfers.Clear();
+        }
+
+        foreach (TransferObject transfer in transfers)
+        {
+            await transfer.DisconnectAsync().ConfigureAwait(false);
         }
     }
+
+    /// <summary>
+    /// 将通信层的小端字节转换成变量实际类型。
+    /// </summary>
+    public ResultData<object> ConvertType(byte[] valueBytes, Type type)
+    {
+        try
+        {
+            object value;
+            if (type == typeof(bool)) value = valueBytes[0] != 0;
+            else if (type == typeof(byte)) value = valueBytes[0];
+            else if (type == typeof(sbyte)) value = unchecked((sbyte)valueBytes[0]);
+            else if (type == typeof(short)) value = BitConverter.ToInt16(valueBytes);
+            else if (type == typeof(ushort)) value = BitConverter.ToUInt16(valueBytes);
+            else if (type == typeof(char)) value = BitConverter.ToChar(valueBytes);
+            else if (type == typeof(int)) value = BitConverter.ToInt32(valueBytes);
+            else if (type == typeof(uint)) value = BitConverter.ToUInt32(valueBytes);
+            else if (type == typeof(float)) value = BitConverter.ToSingle(valueBytes);
+            else if (type == typeof(long)) value = BitConverter.ToInt64(valueBytes);
+            else if (type == typeof(ulong)) value = BitConverter.ToUInt64(valueBytes);
+            else if (type == typeof(double)) value = BitConverter.ToDouble(valueBytes);
+            else if (type == typeof(string)) value = Encoding.UTF8.GetString(valueBytes);
+            else throw new InvalidOperationException($"不支持数据类型：{type.Name}");
+
+            return new ResultData<object>
+            {
+                Status = true,
+                Msg = "数据转换成功",
+                Data = value
+            };
+        }
+        catch (Exception exception)
+        {
+            return new ResultData<object>
+            {
+                Status = false,
+                Msg = exception.Message
+            };
+        }
+    }
+
+    private static string? GetProperty(
+        IEnumerable<DevicePropEntity> properties,
+        string name) =>
+        properties.FirstOrDefault(property =>
+            property.PropName.Equals(name, StringComparison.OrdinalIgnoreCase))?.PropValue?.Trim();
+
+    private static ResultData<ExecuteObject> FailExecute(string message) =>
+        new()
+        {
+            Status = false,
+            Msg = message
+        };
 }

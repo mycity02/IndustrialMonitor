@@ -1,74 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+namespace IndustrialMonitor.Models.Models;
 
-namespace IndustrialMonitor.Models.Models
+public sealed class TrendDeviceVarModel : BindableBase
 {
-    /// <summary>
-    /// 趋势-设备变量模型
-    /// </summary>
-    public class TrendDeviceVarModel : BindableBase
+    private bool _isSelected;
+    private string _axisNum = string.Empty;
+    private string _color = "DodgerBlue";
+
+    public bool IsSelected
     {
-        #region 基本属性
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
 
-        private bool _isSelected;
+    public string DeviceNum { get; set; } = string.Empty;
+    public string VarNum { get; set; } = string.Empty;
+    public string VarName { get; set; } = string.Empty;
+    public string VarType { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 是否选择
-        /// </summary>
-        public bool IsSelected
-        {
-            get { return _isSelected; }
-            set
-            {
-                SetProperty(ref _isSelected, value);
-            }
-        }
+    public string ANum
+    {
+        get => _axisNum;
+        set => SetProperty(ref _axisNum, value);
+    }
 
-        /// <summary>
-        /// 设备编号
-        /// </summary>
-        public string DeviceNum { get; set; }
-
-        /// <summary>
-        /// 变量编号
-        /// </summary>
-        public string VarNum { get; set; }
-
-        /// <summary>
-        /// 变量名称
-        /// </summary>
-        public string VarName { get; set; }
-
-        /// <summary>
-        /// 变量类型
-        /// </summary>
-        public string VarType { get; set; }
-
-        private string _aNum;
-
-        /// <summary>
-        /// 纵轴编号
-        /// </summary>
-        public string ANum
-        {
-            get { return _aNum; }
-            set { SetProperty(ref _aNum, value); }
-        }
-
-        private string _color;
-
-        /// <summary>
-        /// 颜色
-        /// </summary>
-        public string Color
-        {
-            get { return _color; }
-            set { SetProperty(ref _color, value); }
-        }
-
-        #endregion
+    public string Color
+    {
+        get => _color;
+        set => SetProperty(ref _color, value);
     }
 }

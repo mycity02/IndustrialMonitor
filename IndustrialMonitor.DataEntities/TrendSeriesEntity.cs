@@ -1,55 +1,17 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace IndustrialMonitor.DataEntities
+namespace IndustrialMonitor.DataEntities;
+
+[Table("monitor_TrendSerieses")]
+public class TrendSeriesEntity
 {
-    /// <summary>
-    /// 趋势图序表
-    /// </summary>
-    [Table("monitor_TrendSerieses")]
-    public class TrendSeriesEntity
-    {
-        /// <summary>
-        /// 显示Id
-        /// </summary>
-        [Key]
-        public int SeriesId { get; set; }
-
-        /// <summary>
-        /// 设备编号
-        /// </summary>
-        public string DeviceNum { get; set; }
-
-
-        /// <summary>
-        /// 变量编号
-        /// </summary>
-        public string VarNum { get; set; }
-
-
-        /// <summary>
-        /// 趋势编号
-        /// </summary>
-        public string TrendNum { get; set; }
-
-        /// <summary>
-        /// 纵轴编号
-        /// </summary>
-        public string ANum { get; set; }
-
-        /// <summary>
-        /// 标题
-        /// </summary>
-        public string Title { get; set; }
-
-        /// <summary>
-        /// 颜色
-        /// </summary>
-        public string Color { get; set; }
-    }
+    [Key]
+    public int SeriesId { get; set; }
+    public string DeviceNum { get; set; } = string.Empty;
+    public string VarNum { get; set; } = string.Empty;
+    public string TrendNum { get; set; } = string.Empty;
+    public string ANum { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Color { get; set; } = string.Empty;
 }

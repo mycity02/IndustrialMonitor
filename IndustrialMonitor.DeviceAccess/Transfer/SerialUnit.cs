@@ -1,190 +1,128 @@
-﻿using IndustrialMonitor.DataEntities;
+using IndustrialMonitor.DataEntities;
 using IndustrialMonitor.DeviceAccess.Base;
-using System;
-using System.Collections.Generic;
+using NModbus;
+using NModbus.Serial;
 using System.IO.Ports;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace IndustrialMonitor.DeviceAccess.Transfer
+namespace IndustrialMonitor.DeviceAccess.Transfer;
+
+/// <summary>
+/// Modbus RTU 串口连接。这里只配置和打开串口，协议报文交给 NModbus。
+/// </summary>
+internal sealed class SerialUnit : TransferObject
 {
-    /// <summary>
-    /// 串口传输对象
-    /// </summary>
-    internal class SerialUnit : TransferObject
+    private string _portName = string.Empty;
+    private int _baudRate = 9600;
+    private int _dataBits = 8;
+    private Parity _parity = Parity.None;
+    private StopBits _stopBits = StopBits.One;
+    private SerialPort? _serialPort;
+
+    internal override string ConnectionKey => $"RTU:{_portName.ToUpperInvariant()}";
+
+    internal override Result Config(List<DevicePropEntity> properties)
     {
-        private static readonly object transLock = new object();
-
-        SerialPort serialPort;
-        public SerialUnit()
+        Result commonResult = base.Config(properties);
+        if (!commonResult.Status)
         {
-            serialPort = new SerialPort();
-            //serialPort.PortName = "COM1";
-            //serialPort.DataBits= 8;
-
-            //this.Tunit = serialPort;
+            return commonResult;
         }
 
-        /// <summary>
-        /// 是否连接。默认未连接
-        /// </summary>
-        internal bool ConnectState { get; set; } = false;
-
-        /// <summary>
-        /// 串口属性配置
-        /// </summary>
-        /// <param name="props"></param>
-        /// <returns></returns>
-        internal override Result Config(List<DevicePropEntity> props)
+        try
         {
-            // 端口名称、波特率、数据位、校验位、停止位
-            Result result = new Result();
-            try
-            {
-                foreach (var item in props)
-                {
-                    object v = null;
-                    PropertyInfo pi = serialPort.GetType().GetProperty(item.PropName.Trim(), BindingFlags.Public | BindingFlags.Instance);
-                    if (pi == null)
-                    {
-                        continue;
-                    }
+            _portName = GetProperty(properties, "PortName")
+                ?? throw new InvalidOperationException("未配置串口名称");
+            _baudRate = ParseInt(properties, "BaudRate", 9600);
 
-                    Type propType = pi.PropertyType;//类型
-                    if (propType.IsEnum)
-                    {
-                        v = Enum.Parse(propType, item.PropValue.Trim() as string);
-                    }
-                    else
-                    {
-                        v = Convert.ChangeType(item.PropValue.Trim(), propType);//转为指定类型
-                    }
+            // 兼容旧数据库中的 DataBit/StopBit 和新界面中的 DataBits/StopBits。
+            _dataBits = ParseInt(properties, ["DataBits", "DataBit"], 8);
+            _parity = ParseEnum(properties, "Parity", Parity.None);
+            _stopBits = ParseEnum(properties, ["StopBits", "StopBit"], StopBits.One);
 
-                    pi.SetValue(serialPort, v);//将值赋给属性
-                }
-
-                result.Status = true;
-                result.Msg = "没有错误";
-            }
-            catch (Exception ex)
-            {
-                result.Status = false;
-                result.Msg = ex.Message;
-            }
-
-            return result;
+            return new Result { Status = true, Msg = "串口参数配置成功" };
         }
-
-        /// <summary>
-        /// 连接
-        /// </summary>
-        /// <param name="trycount">重试次数</param>
-        /// <returns></returns>
-        internal override Result Connect(int trycount = 30)
+        catch (Exception exception)
         {
-            lock (transLock)
+            return new Result { Status = false, Msg = exception.Message };
+        }
+    }
+
+    protected override Task<IModbusMaster> CreateMasterAsync(
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        _serialPort = new SerialPort(_portName, _baudRate, _parity, _dataBits, _stopBits)
+        {
+            ReadTimeout = Timeout,
+            WriteTimeout = Timeout
+        };
+        _serialPort.Open();
+
+        IModbusMaster master = new ModbusFactory().CreateRtuMaster(_serialPort);
+        return Task.FromResult(master);
+    }
+
+    protected override void CloseConnection()
+    {
+        try
+        {
+            if (_serialPort?.IsOpen == true)
             {
-                Result result = new Result { Status = true, Msg = "打开成功" };
-                try
-                {
-                    int count = 0;//连接次数
-                    while (count < trycount)//如果连接次数<重试次数
-                    {
-                        if (serialPort.IsOpen)
-                        {
-                            break;
-                        }
-
-                        try
-                        {
-                            serialPort.Open();
-                            break;
-                        }
-                        catch (System.IO.IOException)
-                        {
-                            Task.Delay(1).GetAwaiter().GetResult();
-                            count++;
-                        }
-                    }
-                    if (!serialPort.IsOpen)
-                    {
-                        throw new Exception("串口打开失败");
-                    }
-
-                    ConnectState = true;
-                }
-                catch (Exception e)
-                {
-                    result.Status = false;
-                    result.Msg = e.Message;
-                }
-
-                return result;
+                _serialPort.Close();
             }
         }
-
-        /// <summary>
-        /// 断开连接
-        /// </summary>
-        internal override void DisConnect()
+        catch
         {
-            if (serialPort.IsOpen)
-            {
-                serialPort.Close();
-            }
+            // 串口可能已被 NModbus 释放，重复关闭是安全的。
+        }
+        finally
+        {
+            _serialPort?.Dispose();
+            _serialPort = null;
+        }
+    }
 
-            ConnectState = false;
+    private static int ParseInt(
+        IEnumerable<DevicePropEntity> properties,
+        string name,
+        int defaultValue) => ParseInt(properties, [name], defaultValue);
+
+    private static int ParseInt(
+        IEnumerable<DevicePropEntity> properties,
+        string[] names,
+        int defaultValue)
+    {
+        string? value = GetProperty(properties, names);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return defaultValue;
         }
 
-        /// <summary>
-        /// 发送和接收数据
-        /// </summary>
-        /// <param name="req">发送报文</param>
-        /// <param name="receiveLen">正常接收长度</param>
-        /// <param name="errorLen">错误长度的字节个数</param>
-        /// <param name="timeout">超时时间(毫秒)</param>
-        /// <returns>响应的整个报文</returns>
-        internal override ResultData<List<byte>> SendAndReceived(List<byte> req, int receiveLen, int errorLen, int timeout = 5000, Func<byte[], int> calcLen = null)
+        return int.TryParse(value, out int number) && number > 0
+            ? number
+            : throw new InvalidOperationException($"串口参数 {names[0]} 无效");
+    }
+
+    private static TEnum ParseEnum<TEnum>(
+        IEnumerable<DevicePropEntity> properties,
+        string name,
+        TEnum defaultValue) where TEnum : struct, Enum =>
+        ParseEnum(properties, [name], defaultValue);
+
+    private static TEnum ParseEnum<TEnum>(
+        IEnumerable<DevicePropEntity> properties,
+        string[] names,
+        TEnum defaultValue) where TEnum : struct, Enum
+    {
+        string? value = GetProperty(properties, names);
+        if (string.IsNullOrWhiteSpace(value))
         {
-            lock (transLock)
-            {
-                ResultData<List<byte>> result = new ResultData<List<byte>>();
-                // 发送
-                serialPort.Write(req.ToArray(), 0, req.Count);
-
-                List<byte> respBytes = new List<byte>();//返回的所有字节数组
-                try
-                {
-                    serialPort.ReadTimeout = timeout;
-                    while (respBytes.Count < Math.Max(receiveLen, errorLen))
-                    {
-                        byte data = (byte)serialPort.ReadByte();//粘性
-                        respBytes.Add(data);
-                    }
-
-                    // 异常：一定时间内没有拿到字节数据
-                    result.Status = true;
-                    result.Msg = "读取成功";
-                }
-                catch (TimeoutException)
-                {
-                    result.Status = false;
-                    result.Msg = "接收报文超时";
-                }
-                catch (Exception e)
-                {
-                    // 异常：一定时间内没有拿到字节数据
-                    result.Status = false;
-                    result.Msg = e.Message;
-                }
-                finally
-                {
-                    result.Data = respBytes;
-                }
-                return result;
-            }
+            return defaultValue;
         }
+
+        return Enum.TryParse(value, true, out TEnum result)
+            ? result
+            : throw new InvalidOperationException($"串口参数 {names[0]} 无效");
     }
 }

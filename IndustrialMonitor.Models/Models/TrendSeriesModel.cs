@@ -1,94 +1,63 @@
-﻿using LiveCharts;
+using LiveCharts;
 using LiveCharts.Wpf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace IndustrialMonitor.Models.Models
+namespace IndustrialMonitor.Models.Models;
+
+public sealed class TrendSeriesModel
 {
-    /// <summary>
-    /// 图表的某一条序列
-    /// </summary>
-    public class TrendSeriesModel
+    private string _title = "新序列";
+    private string _color = "DodgerBlue";
+    private string _axisNum = string.Empty;
+
+    public TrendSeriesModel()
     {
-        #region 基本属性
-
-        /// <summary>
-        /// 设备编号
-        /// </summary>
-        public string DeviceNum { get; set; }
-
-        /// <summary>
-        /// 变量编号
-        /// </summary>
-        public string VarNum { get; set; }
-
-
-        private string _title;
-
-        /// <summary>
-        /// 图表标题
-        /// </summary>
-        public string Title
-        {
-            get { return _title; }
-            set
-            {
-                _title = value;
-                Series.Title = value;
-            }
-        }
-
-        private string _color;
-
-        /// <summary>
-        /// 颜色
-        /// </summary>
-        public string Color
-        {
-            get { return _color; }
-            set
-            {
-                _color = value;
-                Series.Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString(value));
-            }
-        }
-
-        private string _ANum;
-
-        /// <summary>
-        /// 纵轴编号
-        /// </summary>
-        public string ANum
-        {
-            get { return _ANum; }
-            set
-            {
-                _ANum = value;
-                var index = AxisIndexFunc?.Invoke(value);
-                Series.ScalesYAt = (index == null ? 0 : (int)index);//纵轴索引位置
-            }
-        }
-
-        #endregion
-
-        #region 显示序列
-
-        public Func<string, int> AxisIndexFunc { get; set; }//获取序列索引
-
-        /// <summary>
-        /// 显示的一个序列(livecharts)
-        /// </summary>
-        public LineSeries Series { get; set; } = new LineSeries()
+        Series = new LineSeries
         {
             Values = new ChartValues<double>(),
             Fill = Brushes.Transparent,
             StrokeThickness = 2
         };
-
-        #endregion
+        Title = _title;
+        Color = _color;
     }
+
+    public string DeviceNum { get; set; } = string.Empty;
+    public string VarNum { get; set; } = string.Empty;
+
+    public string Title
+    {
+        get => _title;
+        set
+        {
+            _title = value;
+            Series.Title = value;
+        }
+    }
+
+    public string Color
+    {
+        get => _color;
+        set
+        {
+            _color = value;
+            if (ColorConverter.ConvertFromString(value) is System.Windows.Media.Color color)
+            {
+                Series.Stroke = new SolidColorBrush(color);
+            }
+        }
+    }
+
+    public string ANum
+    {
+        get => _axisNum;
+        set
+        {
+            _axisNum = value;
+            Series.ScalesYAt = Math.Max(0, AxisIndexFunc?.Invoke(value) ?? 0);
+        }
+    }
+
+    public Func<string, int>? AxisIndexFunc { get; set; }
+    public LineSeries Series { get; }
 }

@@ -22,119 +22,11 @@ namespace IndustrialMonitor.DBAcess.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("IndustrialMonitor.DataEntities.AirRankingEntity", b =>
-                {
-                    b.Property<int>("RankingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("RankingId"));
-
-                    b.Property<double>("FinishedValue")
-                        .HasColumnType("double");
-
-                    b.Property<double>("PlanValue")
-                        .HasColumnType("double");
-
-                    b.Property<string>("WorkshopName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("RankingId");
-
-                    b.ToTable("monitor_AirRankings");
-                });
-
-            modelBuilder.Entity("IndustrialMonitor.DataEntities.ComponentEntity", b =>
-                {
-                    b.Property<int>("ComponentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ComponentId"));
-
-                    b.Property<string>("ComponentName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ComponentType")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<double>("Height")
-                        .HasColumnType("double");
-
-                    b.Property<string>("Icon")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("TypeName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<double>("Width")
-                        .HasColumnType("double");
-
-                    b.HasKey("ComponentId");
-
-                    b.ToTable("monitor_Components");
-                });
-
-            modelBuilder.Entity("IndustrialMonitor.DataEntities.DeviceAlarmEntity", b =>
-                {
-                    b.Property<string>("AlarmNum")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("Account")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("AlarmContent")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("AlarmValue")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ConfNum")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("DeviceName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("DeviceNum")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("RecordTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("SolveTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("State")
-                        .HasColumnType("int");
-
-                    b.Property<string>("VarName")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("VarNum")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("AlarmNum");
-
-                    b.ToTable("monitor_DeviceAlarms");
-                });
-
             modelBuilder.Entity("IndustrialMonitor.DataEntities.DeviceEntity", b =>
                 {
                     b.Property<string>("DeviceNum")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<int>("ComponentId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ComponentType")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -142,27 +34,6 @@ namespace IndustrialMonitor.DBAcess.Migrations
                     b.Property<string>("DeviceName")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<int>("FlowDirection")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Height")
-                        .HasColumnType("double");
-
-                    b.Property<int>("Rotate")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Width")
-                        .HasColumnType("double");
-
-                    b.Property<double>("X")
-                        .HasColumnType("double");
-
-                    b.Property<double>("Y")
-                        .HasColumnType("double");
-
-                    b.Property<double>("Z")
-                        .HasColumnType("double");
 
                     b.HasKey("DeviceNum");
 
@@ -226,26 +97,6 @@ namespace IndustrialMonitor.DBAcess.Migrations
                     b.ToTable("monitor_DeviceVars");
                 });
 
-            modelBuilder.Entity("IndustrialMonitor.DataEntities.DeviceWarningEntity", b =>
-                {
-                    b.Property<int>("WarningId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("WarningId"));
-
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("WarningId");
-
-                    b.ToTable("monitor_DeviceWarnings");
-                });
-
             modelBuilder.Entity("IndustrialMonitor.DataEntities.ManualControlEntity", b =>
                 {
                     b.Property<int>("ControlId")
@@ -287,9 +138,6 @@ namespace IndustrialMonitor.DBAcess.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("AlarmNum")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("DeviceName")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -317,115 +165,6 @@ namespace IndustrialMonitor.DBAcess.Migrations
                     b.ToTable("monitor_MonitorRecords");
                 });
 
-            modelBuilder.Entity("IndustrialMonitor.DataEntities.MonitorSettingEntity", b =>
-                {
-                    b.Property<int>("SettingNum")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("DeviceNum")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Header")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("VarNum")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("SettingNum");
-
-                    b.ToTable("monitor_MonitorSettings");
-                });
-
-            modelBuilder.Entity("IndustrialMonitor.DataEntities.PropEntity", b =>
-                {
-                    b.Property<int>("PropId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("PropId"));
-
-                    b.Property<string>("PropName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("PropTitle")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("PropType")
-                        .HasColumnType("int");
-
-                    b.HasKey("PropId");
-
-                    b.ToTable("monitor_Properties");
-                });
-
-            modelBuilder.Entity("IndustrialMonitor.DataEntities.SevenAirEntity", b =>
-                {
-                    b.Property<int>("AirId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("AirId"));
-
-                    b.Property<decimal>("Air")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<string>("Day")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("AirId");
-
-                    b.ToTable("monitor_SevenAirs");
-                });
-
-            modelBuilder.Entity("IndustrialMonitor.DataEntities.SevenLeakEntity", b =>
-                {
-                    b.Property<int>("LeakId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("LeakId"));
-
-                    b.Property<string>("Day")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal>("Leak")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.HasKey("LeakId");
-
-                    b.ToTable("monitor_SevenLeaks");
-                });
-
-            modelBuilder.Entity("IndustrialMonitor.DataEntities.SevenPowerEntity", b =>
-                {
-                    b.Property<int>("PowerId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("PowerId"));
-
-                    b.Property<string>("Day")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal>("Power")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.HasKey("PowerId");
-
-                    b.ToTable("monitor_SevenPowers");
-                });
-
             modelBuilder.Entity("IndustrialMonitor.DataEntities.SysUserEntity", b =>
                 {
                     b.Property<int>("UserId")
@@ -438,25 +177,7 @@ namespace IndustrialMonitor.DBAcess.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Department")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("Gender")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("IsAdmin")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("RealName")
                         .IsRequired()
                         .HasColumnType("longtext");
 

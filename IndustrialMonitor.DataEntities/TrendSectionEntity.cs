@@ -1,35 +1,14 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace IndustrialMonitor.DataEntities
+namespace IndustrialMonitor.DataEntities;
+
+[Table("monitor_TrendSections")]
+public class TrendSectionEntity
 {
-    /// <summary>
-    /// 趋势预警线段表
-    /// </summary>
-    [Table("monitor_TrendSections")]
-    public class TrendSectionEntity
-    {
-        [Key]
-        public int SectionId { get; set; }
-
-        /// <summary>
-        /// 纵轴编号
-        /// </summary>
-        public string AxisNum { get; set; }
-
-        /// <summary>
-        /// 预警值
-        /// </summary>
-        public double Value { get; set; }
-
-        /// <summary>
-        /// 预警线颜色
-        /// </summary>
-        public string Color { get; set; } = "Red";
-    }
+    [Key]
+    public int SectionId { get; set; }
+    public string AxisNum { get; set; } = string.Empty;
+    public double Value { get; set; }
+    public string Color { get; set; } = "Red";
 }

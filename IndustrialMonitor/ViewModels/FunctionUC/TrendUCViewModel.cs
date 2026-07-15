@@ -1,333 +1,340 @@
-using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.Win32;
 using IndustrialMonitor.DataEntities;
 using IndustrialMonitor.DBAcess;
-using IndustrialMonitor.Helper;
 using IndustrialMonitor.Models.Models;
+using IndustrialMonitor.Services;
 using IndustrialMonitor.ViewModels.DialogWin;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
-namespace IndustrialMonitor.ViewModels.FunctionUC
+namespace IndustrialMonitor.ViewModels.FunctionUC;
+
+/// <summary>
+/// 趋势页：管理趋势配置，并用一个 UI 定时器刷新全部曲线。
+/// </summary>
+public sealed class TrendUCViewModel : BindableBase
 {
-    /// <summary>
-    /// 趋势视图模型
-    /// </summary>
-    public class TrendUCViewModel
+    private const int MaxPointCount = 30;
+
+    private readonly MainUCViewModel _mainViewModel;
+    private readonly IDataAccess _dataAccess;
+    private readonly IWindowService _windowService;
+    private readonly DispatcherTimer _refreshTimer;
+    private TrendModel? _selectedTrend;
+
+    public TrendUCViewModel(
+        MainUCViewModel mainViewModel,
+        IDataAccess dataAccess,
+        IWindowService windowService)
     {
-        MainUCViewModel _mainUCViewModel;//主界面视图
+        _mainViewModel = mainViewModel;
+        _dataAccess = dataAccess;
+        _windowService = windowService;
 
-        IDataAccess _dataAccess;//数据库访问
+        BrushList = typeof(Brushes).GetProperties()
+            .Select(property => property.Name)
+            .ToList();
 
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="mainUCViewModel"></param>
-        public TrendUCViewModel(MainUCViewModel mainUCViewModel, IDataAccess dataAccess)
+        TrendList = LoadTrends();
+        if (TrendList.Count == 0)
         {
-            _mainUCViewModel = mainUCViewModel;
-            _dataAccess= dataAccess;
+            TrendList.Add(new TrendModel());
+        }
+        SelectedTrend = TrendList[0];
 
-            //初始化趋势
-            TrendList = new ObservableCollection<TrendModel>()
-                {
-                    new TrendModel{  IsSelected=true, GetAllDeviceFunc=GetAllDevice}//默认有一个趋势并选择了
-                };
+        AddTrendCommand = new DelegateCommand(AddTrend);
+        DelTrendCommand = new DelegateCommand<TrendModel>(DeleteTrend);
+        ShowAxisEditCommand = new DelegateCommand(ShowAxisEditor);
+        ShowDeviceVarDialogCommand = new DelegateCommand(ShowVariableChooser);
+        SaveTrendCommand = new DelegateCommand(SaveTrends);
+        SaveToImageCommand = new DelegateCommand<Visual>(SaveToImage);
 
-            ChartInit();//初始化趋势
+        _refreshTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1)
+        };
+        _refreshTimer.Tick += (_, _) => RefreshCharts();
+        _refreshTimer.Start();
+    }
 
-            //每个趋势都要显示图表
-            foreach (TrendModel trendModel in TrendList)
-            {
-                trendModel.ChartScan();//显示图表
-            }
+    public ObservableCollection<TrendModel> TrendList { get; }
+    public IReadOnlyList<string> BrushList { get; }
+
+    public TrendModel? SelectedTrend
+    {
+        get => _selectedTrend;
+        set => SetProperty(ref _selectedTrend, value);
+    }
+
+    public DelegateCommand AddTrendCommand { get; }
+    public DelegateCommand<TrendModel> DelTrendCommand { get; }
+    public DelegateCommand ShowAxisEditCommand { get; }
+    public DelegateCommand ShowDeviceVarDialogCommand { get; }
+    public DelegateCommand SaveTrendCommand { get; }
+    public DelegateCommand<Visual> SaveToImageCommand { get; }
+
+    private void AddTrend()
+    {
+        var trend = new TrendModel();
+        TrendList.Add(trend);
+        SelectedTrend = trend;
+    }
+
+    private void DeleteTrend(TrendModel? trend)
+    {
+        if (trend == null || TrendList.Count <= 1)
+        {
+            return;
         }
 
-        /// <summary>
-        /// 获取所有设备
-        /// </summary>
-        /// <returns></returns>
-        private List<DeviceModel> GetAllDevice()
+        int nextIndex = Math.Max(0, TrendList.IndexOf(trend) - 1);
+        bool wasSelected = ReferenceEquals(SelectedTrend, trend);
+        TrendList.Remove(trend);
+        if (wasSelected)
         {
-            return _mainUCViewModel.DeviceList.ToList();
+            SelectedTrend = TrendList[nextIndex];
+        }
+    }
+
+    private void ShowAxisEditor()
+    {
+        if (SelectedTrend == null)
+        {
+            return;
         }
 
-        /// <summary>
-        /// 趋势集合
-        /// </summary>
-        public ObservableCollection<TrendModel> TrendList { get; set; }
-
-
-        #region 趋势 添加 删除
-
-        /// <summary>
-        /// 添加趋势
-        /// </summary>
-        public DelegateCommand AddTrendCommand => new DelegateCommand(() =>
+        _windowService.ShowTrendAxisEditor(new TrendAxisEditWinViewModel
         {
-            TrendList.Add(new TrendModel() { IsSelected = true, GetAllDeviceFunc = GetAllDevice });//默认新添加的
+            Trend = SelectedTrend,
+            BrushList = BrushList
         });
+    }
 
-        /// <summary>
-        /// 删除趋势
-        /// </summary>
-        public DelegateCommand<TrendModel> DelTrendCommand => new DelegateCommand<TrendModel>((model) =>
+    private void ShowVariableChooser()
+    {
+        if (SelectedTrend == null)
         {
-            if (TrendList.Count == 1)//至少保留一个
-            {
-                return;
-            }
-
-            //如果删除的趋势为选择状态，默认选择删除的上一个趋势
-            int index = Math.Max(0, TrendList.IndexOf(model) - 1);//新选择的趋势索引
-
-            TrendList.Remove(model);
-            if (model.IsSelected)//如果删除的趋势为选择状态
-            {
-                TrendList[index].IsSelected = true;
-            }
-        });
-
-        public TrendModel SelectedTrend { get; set; }//选择的趋势
-        #endregion
-
-        #region 纵轴编辑
-
-        /// <summary>
-        /// 颜色集合
-        /// </summary>
-        public List<string> BrushList
-        {
-            get
-            {
-                return typeof(Brushes).GetProperties().Select(p => p.Name).ToList();
-            }
+            return;
         }
 
-        public DelegateCommand ShowAxisEditCommand => new DelegateCommand(() =>
+        _windowService.ShowTrendVariableChooser(
+            new TrendDeviceChooseWinViewModel(
+                SelectedTrend,
+                BrushList,
+                _mainViewModel.DeviceList));
+    }
+
+    private void RefreshCharts()
+    {
+        List<DeviceModel> devices = _mainViewModel.DeviceList.ToList();
+        string timeLabel = DateTime.Now.ToString("HH:mm:ss");
+
+        foreach (TrendModel trend in TrendList)
         {
-            if (SelectedTrend == null)
+            IList<string>? labels = trend.XAxis[0].Labels;
+            if (labels != null)
             {
-                return;
+                labels.Add(timeLabel);
+                TrimToLatest(labels, MaxPointCount);
             }
 
-            ActionHelper.ExecuteAndResult("ShowTrendAxisEdit",
-                new TrendAxisEditWinViewModel
+            foreach (TrendSeriesModel series in trend.Series)
+            {
+                DeviceVarModel? variable = devices
+                    .FirstOrDefault(device => device.DeviceNum == series.DeviceNum)?
+                    .DeviceVarList
+                    .FirstOrDefault(item => item.VarNum == series.VarNum);
+
+                if (variable == null || !TryReadDouble(variable.ReadValue, out double value))
                 {
-                    Trend = SelectedTrend,
-                    BrushList = BrushList
+                    continue;
+                }
+
+                series.Series.Values.Add(value);
+                while (series.Series.Values.Count > MaxPointCount)
+                {
+                    series.Series.Values.RemoveAt(0);
+                }
+            }
+        }
+    }
+
+    private static bool TryReadDouble(object value, out double result)
+    {
+        string text = Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty;
+        return double.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out result)
+            || double.TryParse(text, out result);
+    }
+
+    private static void TrimToLatest(IList<string> values, int maxCount)
+    {
+        while (values.Count > maxCount)
+        {
+            values.RemoveAt(0);
+        }
+    }
+
+    private ObservableCollection<TrendModel> LoadTrends()
+    {
+        List<TrendEntity> trends = _dataAccess.GetTrends();
+        List<TrendAxisEntity> axes = _dataAccess.GetTrendAxises();
+        List<TrendSectionEntity> sections = _dataAccess.GetTrendSections();
+        List<TrendSeriesEntity> series = _dataAccess.GetTrendSerieses();
+
+        return new ObservableCollection<TrendModel>(trends.Select(trend =>
+        {
+            var model = new TrendModel
+            {
+                TNum = trend.TrendNum,
+                TrendName = trend.TrendName,
+                IsShowLegend = trend.IsShowLegend
+            };
+
+            var axisModels = new ObservableCollection<TrendAxisModel>(
+                axes.Where(axis => axis.TrendNum == trend.TrendNum)
+                    .Select(axis => new TrendAxisModel
+                    {
+                        ANum = axis.AxisNum,
+                        Title = axis.Title,
+                        IsShowTitle = axis.IsShowTitle,
+                        Minimum = axis.Minimum,
+                        Maximum = axis.Maximum,
+                        IsShowSeperator = axis.IsShowSeperator,
+                        LabelFormater = axis.LabelFormater,
+                        Position = axis.Position,
+                        SectionList = new ObservableCollection<TrendSectionModel>(
+                            sections.Where(section => section.AxisNum == axis.AxisNum)
+                                .Select(section => new TrendSectionModel
+                                {
+                                    Value = section.Value,
+                                    Color = section.Color
+                                }))
+                    }));
+
+            if (axisModels.Count > 0)
+            {
+                model.AxisList = axisModels;
+            }
+
+            model.Series = new ObservableCollection<TrendSeriesModel>(
+                series.Where(item => item.TrendNum == trend.TrendNum)
+                    .Select(item => new TrendSeriesModel
+                    {
+                        DeviceNum = item.DeviceNum,
+                        VarNum = item.VarNum,
+                        Title = item.Title,
+                        Color = string.IsNullOrWhiteSpace(item.Color) ? "DodgerBlue" : item.Color,
+                        ANum = item.ANum
+                    }));
+
+            return model;
+        }));
+    }
+
+    private void SaveTrends()
+    {
+        var trends = new List<TrendEntity>();
+        var axes = new List<TrendAxisEntity>();
+        var sections = new List<TrendSectionEntity>();
+        var series = new List<TrendSeriesEntity>();
+
+        foreach (TrendModel trend in TrendList)
+        {
+            trends.Add(new TrendEntity
+            {
+                TrendNum = trend.TNum,
+                TrendName = trend.TrendName,
+                IsShowLegend = trend.IsShowLegend
+            });
+
+            foreach (TrendAxisModel axis in trend.AxisList)
+            {
+                axes.Add(new TrendAxisEntity
+                {
+                    AxisNum = axis.ANum,
+                    TrendNum = trend.TNum,
+                    Title = axis.Title,
+                    IsShowTitle = axis.IsShowTitle,
+                    Minimum = axis.Minimum,
+                    Maximum = axis.Maximum,
+                    IsShowSeperator = axis.IsShowSeperator,
+                    LabelFormater = axis.LabelFormater,
+                    Position = axis.Position
                 });
-        });
-        #endregion
 
-        #region 打开选择设备变量
-        public DelegateCommand ShowDeviceVarDialogCommand => new DelegateCommand(() =>
-        {
-            if (SelectedTrend == null)
-            {
-                return;
-            }
-            ActionHelper.ExecuteAndResult("ShowTrendVars",
-                new TrendDeviceChooseWinViewModel(SelectedTrend, BrushList, _mainUCViewModel));
-        });
-        #endregion
-
-        #region 保存趋势所有配置
-        public DelegateCommand SaveTrendCommand => new DelegateCommand(() =>
-        {
-            List<TrendEntity> trendEntities = new List<TrendEntity>();//趋势
-            List<TrendAxisEntity> trendAxisEntities = new List<TrendAxisEntity>();//纵轴
-            List<TrendSectionEntity> trendSectionEntities = new List<TrendSectionEntity>();//预警线
-            List<TrendSeriesEntity> trendSeriesEntities = new List<TrendSeriesEntity>();//图序列
-
-            foreach (TrendModel trendInfo in TrendList)
-            {
-                //趋势
-                trendEntities.Add(new TrendEntity { TrendNum = trendInfo.TNum, TrendName = trendInfo.TrendName, IsShowLegend = trendInfo.IsShowLegend });
-
-                //纵轴信息
-                foreach (TrendAxisModel trendAxisInfo in trendInfo.AxisList)
+                sections.AddRange(axis.SectionList.Select(section => new TrendSectionEntity
                 {
-                    trendAxisEntities.Add(new TrendAxisEntity
-                    {
-                        AxisNum = trendAxisInfo.ANum,
-                        TrendNum = trendInfo.TNum,
-                        Title = trendAxisInfo.Title,
-                        IsShowTitle = trendAxisInfo.IsShowTitle,
-                        Minimum = trendAxisInfo.Minimum,
-                        Maximum = trendAxisInfo.Maximum,
-                        IsShowSeperator = trendAxisInfo.IsShowSeperator,
-                        LabelFormater = trendAxisInfo.LabelFormater,
-                        Position = trendAxisInfo.Position,
-                    });
-
-                    //预警线
-                    foreach (TrendSectionModel trendSectionInfo in trendAxisInfo.SectionList)
-                    {
-                        trendSectionEntities.Add(new TrendSectionEntity { AxisNum = trendAxisInfo.ANum, Value = trendSectionInfo.Value, Color = trendSectionInfo.Color });
-                    }
-                }
-
-                //图序列
-                foreach (TrendSeriesModel trendSeriesInfo in trendInfo.Series)
-                {
-                    trendSeriesEntities.Add(new TrendSeriesEntity
-                    {
-                        DeviceNum = trendSeriesInfo.DeviceNum,
-                        VarNum = trendSeriesInfo.VarNum,
-                        Title = trendSeriesInfo.Title,
-                        Color = trendSeriesInfo.Color,
-                        ANum = trendSeriesInfo.ANum,
-                        TrendNum = trendInfo.TNum,
-                    });
-                }
+                    AxisNum = axis.ANum,
+                    Value = section.Value,
+                    Color = section.Color
+                }));
             }
 
-            _dataAccess.SaveTrend(trendEntities, trendAxisEntities, trendSectionEntities, trendSeriesEntities);
-            MessageBox.Show("保存趋势信息成功");
-        });
-        #endregion
-
-        #region 初始化趋势图表
-
-        /// <summary>
-        /// 初始化趋势图表
-        /// </summary>
-        private void ChartInit()
-        {
-            var trendList = _dataAccess.GetTrends();//趋势
-            var trendAxisList = _dataAccess.GetTrendAxises();//趋势纵轴
-            var trendSections = _dataAccess.GetTrendSections();//预警
-            var trendSerieses = _dataAccess.GetTrendSerieses();//图表序列
-
-            this.TrendList = new ObservableCollection<TrendModel>(trendList.Select(t => new TrendModel
+            series.AddRange(trend.Series.Select(item => new TrendSeriesEntity
             {
-                //趋势基本信息
-                GetAllDeviceFunc = GetAllDevice,//获取所有设备的方法
-                TNum = t.TrendNum,
-                TrendName = t.TrendName,
-                IsShowLegend = t.IsShowLegend,
-
-                //纵轴
-                AxisList = new ObservableCollection<TrendAxisModel>(trendAxisList.Where(ta => ta.TrendNum == t.TrendNum).Select(a => new TrendAxisModel
-                {
-                    ANum = a.AxisNum,
-                    Title = a.Title,
-                    IsShowTitle = a.IsShowTitle,
-                    Minimum = a.Minimum,
-                    Maximum = a.Maximum,
-                    IsShowSeperator = a.IsShowSeperator,
-
-                    LabelFormater = a.LabelFormater,
-                    Position = a.Position,
-
-                    //预警信息
-                    SectionList = new ObservableCollection<TrendSectionModel>(trendSections.Where(ts => ts.AxisNum == a.AxisNum).Select(s => new TrendSectionModel
-                    {
-                        Value = s.Value,
-                        Color = s.Color
-                    }))
-                })),
-
-                //图表序列
-                Series = new ObservableCollection<TrendSeriesModel>(trendSerieses.Where(tseries => tseries.TrendNum == t.TrendNum).Select(s => new TrendSeriesModel
-                {
-                    DeviceNum = s.DeviceNum,
-                    VarNum = s.VarNum,
-                    Title = s.Title,
-                    Color = s.Color,
-                    ANum = s.ANum
-                }))
+                DeviceNum = item.DeviceNum,
+                VarNum = item.VarNum,
+                Title = item.Title,
+                Color = item.Color,
+                ANum = item.ANum,
+                TrendNum = trend.TNum
             }));
-
-            if (this.TrendList.Count > 0)//默认选中第一个
-            {
-                this.TrendList[0].IsSelected = true;
-            }
         }
-        #endregion
 
-        #region 导出图像
-
-        public DelegateCommand<Visual> SaveToImageCommand => new DelegateCommand<Visual>(SaveToImage);
-
-        /// <summary>
-        /// 导出图像
-        /// </summary>
-        /// <param name="obj">导出图像的视觉，如grid等</param>
-        private void SaveToImage(Visual obj)
+        try
         {
-            // 创建保存文件对话框
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            // 设置默认文件名：Chart + 时间戳（精确到毫秒） + .png，避免文件名重复
-            saveFileDialog.FileName = "Chart" + DateTime.Now.ToString("yyyyMMddHHmmssFFF") + ".png";
-            saveFileDialog.Filter = "PNG图片 (*.png)|*.png|JPG图片 (*.jpg)|*.jpg|GIF图片 (*.gif)|*.gif";// 过滤文件类型
-            // 检查保存路径是否存在（不存在则提示用户） 检查文件所在的文件夹是否存在
-            saveFileDialog.CheckPathExists = true;
-            // 显示对话框，用户点击"保存"时返回true
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                // 将传入的obj转换为Visual类型，调用渲染保存方法
-                CreateBitmapFromVisual(obj, saveFileDialog.FileName);
-            }
+            _dataAccess.SaveTrend(trends, axes, sections, series);
+            _windowService.ShowInformation("趋势配置已保存", "趋势");
         }
-
-        /// <summary>
-        /// 渲染保存方法
-        /// </summary>
-        /// <param name="target">视觉</param>
-        /// <param name="fileName">文件名</param>
-        private void CreateBitmapFromVisual(Visual target, string fileName)
+        catch (Exception exception)
         {
-            if (target == null || string.IsNullOrEmpty(fileName))
-            {
-                return;
-            }
-
-            // 获取目标Visual元素的边界（宽、高、位置）
-            Rect bounds = VisualTreeHelper.GetDescendantBounds(target);
-
-            // 创建渲染目标位图：参数依次为宽、高、DPI（水平/垂直）、像素格式
-            RenderTargetBitmap renderTarget = new RenderTargetBitmap((int)bounds.Width, (int)bounds.Height, 96, 96, PixelFormats.Pbgra32);
-
-            // 创建绘图可视化对象，用于承载要渲染的内容
-            DrawingVisual visual = new DrawingVisual();
-
-            // 打开绘图上下文（using自动释放资源）
-            using (DrawingContext context = visual.RenderOpen())
-            {
-                // 创建视觉画刷，绑定到目标Visual元素
-                VisualBrush visualBrush = new VisualBrush(target);
-
-                // 绘制矩形：用视觉画刷填充，覆盖目标元素的整个边界
-                context.DrawRectangle(visualBrush, null, new Rect(new Point(), bounds.Size));
-            }
-
-            // 将绘制好的visual渲染到位图中
-            renderTarget.Render(visual);
-
-            // 创建PNG编码器（用于将位图转为PNG格式）
-
-            PngBitmapEncoder bitmapEncoder = new PngBitmapEncoder();
-
-            // 将渲染后的位图添加为编码器的帧
-            bitmapEncoder.Frames.Add(BitmapFrame.Create(renderTarget));
-
-            // 创建文件流（using自动关闭流），将编码后的内容写入文件
-            using (Stream stm = File.Create(fileName))
-            {
-                bitmapEncoder.Save(stm);
-            }
+            _windowService.ShowError($"保存失败：{exception.Message}", "趋势");
         }
-        #endregion
+    }
+
+    private void SaveToImage(Visual? visual)
+    {
+        if (visual == null)
+        {
+            return;
+        }
+
+        string? fileName = _windowService.ChooseSaveFile(
+            "导出趋势图",
+            "PNG 图片 (*.png)|*.png",
+            $"Trend-{DateTime.Now:yyyyMMdd-HHmmss}.png");
+
+        if (fileName != null)
+        {
+            CreateBitmapFromVisual(visual, fileName);
+        }
+    }
+
+    private static void CreateBitmapFromVisual(Visual target, string fileName)
+    {
+        Rect bounds = VisualTreeHelper.GetDescendantBounds(target);
+        int width = (int)Math.Ceiling(bounds.Width);
+        int height = (int)Math.Ceiling(bounds.Height);
+        if (width <= 0 || height <= 0)
+        {
+            return;
+        }
+
+        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+        var drawingVisual = new DrawingVisual();
+        using (DrawingContext context = drawingVisual.RenderOpen())
+        {
+            context.DrawRectangle(new VisualBrush(target), null, new Rect(new Point(), bounds.Size));
+        }
+        bitmap.Render(drawingVisual);
+
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using FileStream stream = File.Create(fileName);
+        encoder.Save(stream);
     }
 }

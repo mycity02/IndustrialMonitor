@@ -1,37 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
-namespace IndustrialMonitor.Views.DialogWin
+namespace IndustrialMonitor.Views.DialogWin;
+
+public partial class TrendAxisEditWin : Window
 {
-    /// <summary>
-    /// TrendAxisEditWin.xaml 的交互逻辑
-    /// </summary>
-    public partial class TrendAxisEditWin : Window
+    public TrendAxisEditWin()
     {
-        public TrendAxisEditWin()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+    }
 
-        /// <summary>
-        /// 关闭窗体
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BtnCancel_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
+    private void BtnCancel_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
     }
 }

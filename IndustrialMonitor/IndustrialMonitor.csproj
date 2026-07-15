@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.17">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.17">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -22,8 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IndustrialMonitor.CommonResource\IndustrialMonitor.CommonResource.csproj" />
-    <ProjectReference Include="..\IndustrialMonitor.Compenents\IndustrialMonitor.Compenents.csproj" />
-    <ProjectReference Include="..\IndustrialMonitor.Converter\IndustrialMonitor.Converter.csproj" />
     <ProjectReference Include="..\IndustrialMonitor.DBAcess\IndustrialMonitor.DBAcess.csproj" />
     <ProjectReference Include="..\IndustrialMonitor.DeviceAccess\IndustrialMonitor.DeviceAccess.csproj" />
     <ProjectReference Include="..\IndustrialMonitor.Helper\IndustrialMonitor.Helper.csproj" />

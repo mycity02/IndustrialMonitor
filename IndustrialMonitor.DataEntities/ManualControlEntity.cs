@@ -1,44 +1,15 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace IndustrialMonitor.DataEntities
+namespace IndustrialMonitor.DataEntities;
+
+[Table("monitor_ManualControls")]
+public class ManualControlEntity
 {
-    /// <summary>
-    /// 手动控制表
-    /// </summary>
-    [Table("monitor_ManualControls")]
-    public class ManualControlEntity
-    {
-        /// <summary>
-        /// 手动控制ID
-        /// </summary>
-        [Key]
-        public int ControlId { get; set; }
-
-        /// <summary>
-        /// 设备编号
-        /// </summary>
-        public string DeviceNum { get; set; }
-
-
-        /// <summary>
-        /// 手动控制名称
-        /// </summary>
-        public string ControlName { get; set; }
-
-        /// <summary>
-        /// 手动控制地址
-        /// </summary>
-        public string ControlAddress { get; set; }
-
-        /// <summary>
-        /// 手动控制值
-        /// </summary>
-        public string ControlValue { get; set; }
-    }
+    [Key]
+    public int ControlId { get; set; }
+    public string DeviceNum { get; set; } = string.Empty;
+    public string ControlName { get; set; } = string.Empty;
+    public string ControlAddress { get; set; } = string.Empty;
+    public string ControlValue { get; set; } = string.Empty;
 }

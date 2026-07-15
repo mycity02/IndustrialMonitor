@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Fonts\digital_display.ttf" />
     <None Remove="Fonts\iconfont.ttf" />
     <None Remove="Images\Components\air_compressor.png" />
     <None Remove="Images\Components\can.png" />
@@ -20,11 +19,9 @@
     <None Remove="Images\Components\tee_joints.png" />
     <None Remove="Images\Components\verticalpipe.png" />
     <None Remove="Images\Logo.png" />
-    <None Remove="Images\right.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Fonts\digital_display.ttf" />
     <Resource Include="Fonts\iconfont.ttf" />
     <Resource Include="Images\Components\air_compressor.png" />
     <Resource Include="Images\Components\can.png" />
@@ -36,7 +33,6 @@
     <Resource Include="Images\Components\tee_joints.png" />
     <Resource Include="Images\Components\verticalpipe.png" />
     <Resource Include="Images\Logo.png" />
-    <Resource Include="Images\right.png" />
   </ItemGroup>
 
 </Project>

@@ -1,28 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
-namespace IndustrialMonitor.Views.FunctionUC
+namespace IndustrialMonitor.Views.FunctionUC;
+
+public partial class TrendUC : UserControl
 {
-    /// <summary>
-    /// TrendUC.xaml 的交互逻辑
-    /// </summary>
-    public partial class TrendUC : UserControl
+    public TrendUC()
     {
-        public TrendUC()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

@@ -1,25 +1,16 @@
-﻿using IndustrialMonitor.Models.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using IndustrialMonitor.Models.Models;
 
-namespace IndustrialMonitor.ViewModels
+namespace IndustrialMonitor.ViewModels;
+
+public sealed class AlarmConfViewModel
 {
-    public class AlarmConfViewModel : BindableBase
-    {
-        //操作集合
-        public List<AlarmConfOperatorModel> OperatorList { get; set; } = new List<AlarmConfOperatorModel>();
-        public AlarmConfViewModel()
-        {
-            // 只处理基本的逻辑运算     扩展：组件逻辑处理   &&   ||    ()
-            OperatorList.Add(new AlarmConfOperatorModel() { OperatorName = "大于", OperatorSymbol = ">" });
-            OperatorList.Add(new AlarmConfOperatorModel() { OperatorName = "小于", OperatorSymbol = "<" });
-            OperatorList.Add(new AlarmConfOperatorModel() { OperatorName = "等于", OperatorSymbol = "==" });
-            OperatorList.Add(new AlarmConfOperatorModel() { OperatorName = "大于等于", OperatorSymbol = ">=" });
-            OperatorList.Add(new AlarmConfOperatorModel() { OperatorName = "小于等于", OperatorSymbol = "<=" });
-            OperatorList.Add(new AlarmConfOperatorModel() { OperatorName = "不等于", OperatorSymbol = "!=" });
-        }
-    }
+    public IReadOnlyList<AlarmConfOperatorModel> OperatorList { get; } =
+    [
+        new() { OperatorName = "大于", OperatorSymbol = ">" },
+        new() { OperatorName = "小于", OperatorSymbol = "<" },
+        new() { OperatorName = "等于", OperatorSymbol = "==" },
+        new() { OperatorName = "大于等于", OperatorSymbol = ">=" },
+        new() { OperatorName = "小于等于", OperatorSymbol = "<=" },
+        new() { OperatorName = "不等于", OperatorSymbol = "!=" }
+    ];
 }
