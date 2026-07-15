@@ -1,9 +1,3 @@
 <Solution>
-  <Project Path="IndustrialMonitor.CommonResource/IndustrialMonitor.CommonResource.csproj" />
-  <Project Path="IndustrialMonitor.DataEntities/IndustrialMonitor.DataEntities.csproj" />
-  <Project Path="IndustrialMonitor.DBAcess/IndustrialMonitor.DBAcess.csproj" />
-  <Project Path="IndustrialMonitor.DeviceAccess/IndustrialMonitor.DeviceAccess.csproj" />
-  <Project Path="IndustrialMonitor.Helper/IndustrialMonitor.Helper.csproj" />
-  <Project Path="IndustrialMonitor.Models/IndustrialMonitor.Models.csproj" />
   <Project Path="IndustrialMonitor/IndustrialMonitor.csproj" />
 </Solution>

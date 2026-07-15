@@ -5,7 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:IndustrialMonitor.Views"
              xmlns:function="clr-namespace:IndustrialMonitor.Views.FunctionUC"
-             xmlns:models="clr-namespace:IndustrialMonitor.Models.Models;assembly=IndustrialMonitor.Models"
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
@@ -13,43 +12,9 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/IndustrialMonitor.CommonResource;component/Styles/ButtonStyles.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Resources/Styles/ButtonStyles.xaml"/>
 
                 <ResourceDictionary>
-                    <Style TargetType="ListBoxItem" x:Key="MenuItemStyle">
-                        <Setter Property="Margin" Value="5,8"/>
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ListBoxItem">
-                                    <Border CornerRadius="8" Background="Transparent" Name="root" BorderThickness="1">
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition/>
-                                                <RowDefinition Height="24"/>
-                                            </Grid.RowDefinitions>
-                                            <TextBlock Text="{Binding MenuIcon}"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       FontFamily="{StaticResource Iconfont}" FontSize="28"
-                                                       Margin="0,8,0,0"
-                                                       Foreground="#66000000" Name="icon" Opacity="0.7"/>
-                                            <TextBlock Text="{Binding MenuName}" Grid.Row="1"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       Foreground="#99000000" Name="header" FontSize="11"/>
-                                        </Grid>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="Background" Value="#2216a1ff" TargetName="root"/>
-                                            <Setter Property="BorderBrush" Value="#4416a1ff" TargetName="root"/>
-                                            <Setter Property="Foreground" TargetName="icon" Value="orange"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -101,7 +66,7 @@
                 </LinearGradientBrush>
             </Border.BorderBrush>
             <StackPanel Orientation="Horizontal">
-                <Image Source="/IndustrialMonitor.CommonResource;component/Images/Logo.png"  VerticalAlignment="Top" Margin="10">
+                <Image Source="/Resources/Images/Logo.png"  VerticalAlignment="Top" Margin="10">
                     <Image.Effect>
                         <DropShadowEffect Color="Gray" ShadowDepth="0" BlurRadius="10" Direction="0" Opacity="0.2"/>
                     </Image.Effect>
@@ -171,82 +136,8 @@
                 </Grid.OpacityMask>
             </Grid>
 
-            <!--放功能页的地方 一个控件 自定义的控件-->
-            <Grid Margin="0,5">
-                <function:MonitorUC>
-                    <function:MonitorUC.Style>
-                        <Style TargetType="{x:Type function:MonitorUC}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.CurrentPage, RelativeSource={RelativeSource AncestorType=local:MainUCView}}"
-                                             Value="{x:Static models:MainPage.Monitor}">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </function:MonitorUC.Style>
-                </function:MonitorUC>
-
-                <function:TrendUC>
-                    <function:TrendUC.Style>
-                        <Style TargetType="{x:Type function:TrendUC}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.CurrentPage, RelativeSource={RelativeSource AncestorType=local:MainUCView}}"
-                                             Value="{x:Static models:MainPage.Trend}">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </function:TrendUC.Style>
-                </function:TrendUC>
-
-                <function:MonitorDataUC>
-                    <function:MonitorDataUC.Style>
-                        <Style TargetType="{x:Type function:MonitorDataUC}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.CurrentPage, RelativeSource={RelativeSource AncestorType=local:MainUCView}}"
-                                             Value="{x:Static models:MainPage.MonitorData}">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </function:MonitorDataUC.Style>
-                </function:MonitorDataUC>
-            </Grid>
         </Grid>
 
-        <!--第二行 第一列 菜单-->
-        <Grid Grid.Row="1">
-            <Border BorderThickness="0,0,1,0">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="Transparent" Offset="0.1"/>
-                        <GradientStop Color="#1116a1ff" Offset="0.2"/>
-                        <GradientStop Color="#1116a1ff" Offset="0.5"/>
-                        <GradientStop Color="Transparent" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.Background>
-                <Border.BorderBrush>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="Transparent" Offset="0"/>
-                        <GradientStop Color="Gold" Offset="0.3"/>
-                        <GradientStop Color="Transparent" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.BorderBrush>
-
-                <!--菜单列表-->
-                <ListBox VerticalAlignment="Center"
-                         ItemsSource="{Binding MenuList}"
-                         SelectedItem="{Binding SelectedMenu, Mode=TwoWay}"
-                         ItemContainerStyle="{StaticResource MenuItemStyle}"
-                         Background="Transparent"
-                         BorderThickness="0"
-                         Margin="0,0,0,100"
-                         ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
-            </Border>
-        </Grid>
+        <function:MonitorUC Grid.Row="1" Grid.ColumnSpan="2"/>
     </Grid>
 </UserControl>
-

@@ -1,4 +1,4 @@
-﻿<prism:PrismApplication x:Class="IndustrialMonitor.App"
+<prism:PrismApplication x:Class="IndustrialMonitor.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:IndustrialMonitor"
@@ -8,10 +8,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
                     <FontFamily x:Key="Iconfont">
-                        pack://application:,,,/IndustrialMonitor.CommonResource;component/Fonts/#iconfont
-                    </FontFamily>
-                    <FontFamily x:Key="DigitalDisplay">
-                        pack://application:,,,/IndustrialMonitor.CommonResource;component/Fonts/#DigitalDisplay
+                        pack://application:,,,/Resources/Fonts/#iconfont
                     </FontFamily>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>

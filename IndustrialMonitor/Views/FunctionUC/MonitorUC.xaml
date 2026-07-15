@@ -7,59 +7,27 @@
              d:DesignHeight="720"
              d:DesignWidth="1200"
              Background="#F4F6F8">
-    <UserControl.Resources>
-        <Style x:Key="ManageButton" TargetType="Button">
-            <Setter Property="Background" Value="#1677FF"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="18,9"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-        <Style x:Key="MetricBorder" TargetType="Border">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E5E8EC"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="18,12"/>
-            <Setter Property="Margin" Value="0,0,12,0"/>
-        </Style>
-    </UserControl.Resources>
-
-    <Grid Margin="92,22,22,22">
+    <Grid Margin="22">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="0,0,0,18">
-            <Button DockPanel.Dock="Right"
-                    Content="设备管理"
-                    Command="{Binding OpenDeviceManageCommand}"
-                    Style="{StaticResource ManageButton}"/>
-            <StackPanel>
-                <TextBlock Text="设备监控" FontSize="26" FontWeight="SemiBold" Foreground="#202124"/>
-                <TextBlock Text="显示已配置设备的连接状态、实时变量和手动控制。"
-                           Margin="0,6,0,0" Foreground="#73777D"/>
-            </StackPanel>
-        </DockPanel>
-
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,18">
-            <Border Style="{StaticResource MetricBorder}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="设备数" Foreground="#73777D" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding DeviceList.Count}" FontSize="22" FontWeight="SemiBold"
-                               Foreground="#202124" Margin="18,0,0,0"/>
-                </StackPanel>
-            </Border>
-            <Border Style="{StaticResource MetricBorder}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="异常设备" Foreground="#73777D" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding AbnormalDeviceCount}" FontSize="22" FontWeight="SemiBold"
-                               Foreground="#D4380D" Margin="18,0,0,0"/>
-                </StackPanel>
-            </Border>
+        <StackPanel>
+            <TextBlock Text="Modbus TCP 设备监控" FontSize="26" FontWeight="SemiBold" Foreground="#202124"/>
+            <TextBlock Text="六台固定模拟设备，每台独立后台轮询；支持读取和写回保持寄存器。"
+                       Margin="0,6,0,0" Foreground="#73777D"/>
         </StackPanel>
+
+        <Border Grid.Row="1" Margin="0,16" Padding="18,10" HorizontalAlignment="Left"
+                Background="White" BorderBrush="#E5E8EC" BorderThickness="1" CornerRadius="8">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="设备数" Foreground="#73777D" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding DeviceList.Count}" FontSize="22" FontWeight="SemiBold"
+                           Foreground="#202124" Margin="18,0,0,0"/>
+            </StackPanel>
+        </Border>
 
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
             <ItemsControl ItemsSource="{Binding DeviceList}">
@@ -70,14 +38,8 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Width="390"
-                                MinHeight="260"
-                                Margin="0,0,16,16"
-                                Padding="18"
-                                Background="White"
-                                BorderBrush="#E2E6EA"
-                                BorderThickness="1"
-                                CornerRadius="8">
+                        <Border Width="390" MinHeight="310" Margin="0,0,16,16" Padding="18"
+                                Background="White" BorderBrush="#E2E6EA" BorderThickness="1" CornerRadius="8">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -86,7 +48,7 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <DockPanel Grid.Row="0">
+                                <DockPanel>
                                     <Border DockPanel.Dock="Right" Padding="9,4" CornerRadius="10">
                                         <Border.Style>
                                             <Style TargetType="Border">
@@ -101,11 +63,11 @@
                                         <TextBlock FontSize="12">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value="运行中"/>
+                                                    <Setter Property="Text" Value="通信正常"/>
                                                     <Setter Property="Foreground" Value="#248A4B"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsWarning}" Value="True">
-                                                            <Setter Property="Text" Value="异常"/>
+                                                            <Setter Property="Text" Value="通信异常"/>
                                                             <Setter Property="Foreground" Value="#CF1322"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -114,60 +76,16 @@
                                         </TextBlock>
                                     </Border>
                                     <StackPanel>
-                                        <TextBlock Text="{Binding DeviceName}" FontSize="18" FontWeight="SemiBold" Foreground="#222222"/>
+                                        <TextBlock Text="{Binding DeviceName}" FontSize="18" FontWeight="SemiBold"/>
                                         <TextBlock Text="{Binding DeviceNum}" FontSize="11" Foreground="#8A8F96" Margin="0,4,0,0"/>
                                     </StackPanel>
                                 </DockPanel>
 
-                                <TextBlock Grid.Row="1" Text="{Binding WarningMsg}" Foreground="#CF1322" Margin="0,10,0,0" TextWrapping="Wrap">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsWarning}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                <TextBlock Grid.Row="1" Text="{Binding WarningMsg}" Foreground="#CF1322"
+                                           Margin="0,10,0,0" TextWrapping="Wrap"/>
 
-                                <StackPanel Grid.Row="2" Margin="0,14,0,10">
-                                        <Grid Height="120" Margin="0,6,0,12">
-                                            <Image Source="{Binding DeviceImage}"
-                                                   MaxWidth="180"
-                                                   MaxHeight="115"
-                                                   Stretch="Uniform"
-                                                   RenderOptions.BitmapScalingMode="HighQuality">
-                                                <Image.Style>
-                                                    <Style TargetType="Image">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding HasDeviceImage}" Value="False">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Image.Style>
-                                            </Image>
-                                            <TextBlock Text="暂无设备图片"
-                                                       Foreground="#A0A5AB"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding HasDeviceImage}" Value="False">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Grid>
-                                    <ItemsControl ItemsSource="{Binding DeviceVarList}">
-                                        <ItemsControl.ItemTemplate>
+                                <ItemsControl Grid.Row="2" Margin="0,14,0,10" ItemsSource="{Binding DeviceVarList}">
+                                    <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Margin="0,4">
                                                 <Grid.ColumnDefinitions>
@@ -178,35 +96,36 @@
                                                     <TextBlock Text="{Binding VarName}" Foreground="#444444"/>
                                                     <TextBlock Text="{Binding VarAddress}" FontSize="10" Foreground="#9A9EA4"/>
                                                 </StackPanel>
-                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding ReadValue}" FontSize="18" FontWeight="SemiBold" Foreground="#1677FF"/>
-                                                    <TextBlock Text="{Binding VarType}" FontSize="10" Foreground="#9A9EA4" Margin="6,5,0,0"/>
-                                                </StackPanel>
+                                                <TextBlock Grid.Column="1" Text="{Binding ReadValue}"
+                                                           FontSize="18" FontWeight="SemiBold" Foreground="#1677FF"
+                                                           VerticalAlignment="Center"/>
                                             </Grid>
-                                        </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-
-                                <ItemsControl Grid.Row="3" ItemsSource="{Binding ManualControlList}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" Margin="0,4,8,0">
-                                                <TextBox Text="{Binding ControlValue, UpdateSourceTrigger=PropertyChanged}"
-                                                         Width="58" Padding="5,3" Margin="0,0,5,0"/>
-                                                <Button Content="{Binding ControlName}"
-                                                        Padding="10,4"
-                                                        Command="{Binding DataContext.ManualControlCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                        CommandParameter="{Binding}"/>
-                                            </StackPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
+
+                                <StackPanel Grid.Row="3">
+                                    <TextBlock Text="写回保持寄存器" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                    <ItemsControl ItemsSource="{Binding ManualControlList}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Margin="0,4,8,0">
+                                                    <TextBox Text="{Binding ControlValue, UpdateSourceTrigger=PropertyChanged}"
+                                                             Width="64" Padding="5,3" Margin="0,0,5,0"/>
+                                                    <Button Content="{Binding ControlName}" Padding="8,4"
+                                                            Command="{Binding DataContext.ManualControlCommand,
+                                                                      RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
                             </Grid>
                         </Border>
                     </DataTemplate>

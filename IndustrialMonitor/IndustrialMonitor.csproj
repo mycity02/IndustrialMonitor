@@ -9,29 +9,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.17">
-      <PrivateAssets>all</PrivateAssets>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="NLog" Version="6.1.1" />
-    <PackageReference Include="NPOI" Version="2.7.6" />
+    <PackageReference Include="NModbus" Version="3.0.83" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
     <PackageReference Include="Prism.DryIoc" Version="9.0.537" />
-    <PackageReference Include="System.IO.Ports" Version="10.0.9" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IndustrialMonitor.CommonResource\IndustrialMonitor.CommonResource.csproj" />
-    <ProjectReference Include="..\IndustrialMonitor.DBAcess\IndustrialMonitor.DBAcess.csproj" />
-    <ProjectReference Include="..\IndustrialMonitor.DeviceAccess\IndustrialMonitor.DeviceAccess.csproj" />
-    <ProjectReference Include="..\IndustrialMonitor.Helper\IndustrialMonitor.Helper.csproj" />
-    <ProjectReference Include="..\IndustrialMonitor.Models\IndustrialMonitor.Models.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="NLog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Remove="Resources\Fonts\iconfont.ttf" />
+    <None Remove="Resources\Images\Logo.png" />
+    <Resource Include="Resources\Fonts\iconfont.ttf" />
+    <Resource Include="Resources\Images\Logo.png" />
   </ItemGroup>
 
 </Project>
