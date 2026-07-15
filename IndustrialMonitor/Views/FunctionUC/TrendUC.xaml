@@ -3,12 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:IndustrialMonitor.Views.FunctionUC"
              xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
-             mc:Ignorable="d"
              xmlns:prism="http://prismlibrary.com/"
+             mc:Ignorable="d"
              prism:ViewModelLocator.AutoWireViewModel="True"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="700" d:DesignWidth="1200">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -16,168 +15,97 @@
                 <ResourceDictionary Source="pack://application:,,,/IndustrialMonitor.CommonResource;component/Styles/ButtonStyles.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/IndustrialMonitor.CommonResource;component/Styles/ComboBoxStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <Style TargetType="ToggleButton" x:Key="ShowLegendButtonStlye">
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="ToggleButton">
-                            <Border CornerRadius="3" BorderBrush="#EEE" BorderThickness="1"
-                               Background="#F7F9FA" Name="border">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10,0">
-                                    <Border Width="8" Height="8" CornerRadius="4" Background="#DDD" Name="borState"/>
-                                    <TextBlock Text="{TemplateBinding Content}"
-                                      VerticalAlignment="Center" HorizontalAlignment="Center"
-                                      Foreground="#999"
-                                      Margin="6,6,3,6" Name="txt"/>
-                                </StackPanel>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#EEE"/>
-                                </Trigger>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="txt" Property="Foreground" Value="#444"/>
-                                    <Setter TargetName="borState" Property="Background" Value="orange"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
+
     <Grid Margin="80,10,10,10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="44"/>
+            <RowDefinition Height="72"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <Border BorderBrush="#EEE" BorderThickness="0,0,0,1"/>
-        <Border Background="#5FFF" Grid.Row="1" CornerRadius="0,0,5,5"/>
+        <Border BorderBrush="#EEEEEE" BorderThickness="0,0,0,1"/>
+        <Border Width="3" Height="16" Background="Gold" HorizontalAlignment="Left" CornerRadius="2"/>
+        <TextBlock Text="实时趋势" Margin="12,0,0,0" VerticalAlignment="Center"
+                   Foreground="#409EFE" FontSize="20"/>
 
-        <Border Width="3" Height="15" Background="Gold" HorizontalAlignment="Left" CornerRadius="2"/>
+        <Border Grid.Row="1" Margin="0,10,0,10" Padding="14,8"
+                Background="White" BorderBrush="#E1E6ED" BorderThickness="1" CornerRadius="6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="210"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="210"/>
+                    <ColumnDefinition Width="90"/>
+                    <ColumnDefinition Width="90"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
 
-        <TextBlock Text="实时趋势曲线跟踪" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="#AA409EFE" FontSize="18" FontWeight="Normal" Margin="10,0,0,0">
-            <TextBlock.Effect>
-                <DropShadowEffect Color="White" ShadowDepth="0" BlurRadius="10" Opacity="0.8"/>
-            </TextBlock.Effect>
-        </TextBlock>
+                <TextBlock Text="设备" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Devices}"
+                          SelectedItem="{Binding SelectedDevice, Mode=TwoWay}"
+                          DisplayMemberPath="DeviceName" Margin="0,0,18,0"/>
 
-        <!--#region 第一行操作按钮-->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <TextBlock Grid.Column="2" Text="变量" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <ComboBox Grid.Column="3" ItemsSource="{Binding Variables}"
+                          SelectedItem="{Binding SelectedVariable, Mode=TwoWay}"
+                          DisplayMemberPath="VarName" Margin="0,0,18,0"/>
 
-            <Button Content="纵轴编辑" Style="{StaticResource ToolButtonStlye}" Margin="0,0,5,0" Command="{Binding ShowAxisEditCommand}" />
-            <Button Content="选择设备变量" Style="{StaticResource ToolButtonStlye}" Margin="0,0,5,0" Command="{Binding ShowDeviceVarDialogCommand}" />
+                <Button Grid.Column="4" Content="{Binding RunButtonText}"
+                        Command="{Binding ToggleSamplingCommand}"
+                        Style="{StaticResource NormalButtonStyle}" Margin="0,0,8,0"
+                        Background="#409EFE" Foreground="White"/>
+                <Button Grid.Column="5" Content="清空" Command="{Binding ClearCommand}"
+                        Style="{StaticResource NormalButtonStyle}" Margin="0,0,8,0"/>
 
-            <Button Margin="0,0,5,0" HorizontalAlignment="Right" Height="30" Style="{StaticResource ToolButtonStlye}" Width="120"  Command="{Binding SaveTrendCommand}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="&#xe63c;" FontFamily="{StaticResource Iconfont}" VerticalAlignment="Center" Margin="3,0"/>
-                    <TextBlock Text="保存所有配置" VerticalAlignment="Center" Margin="3,0"/>
-                </StackPanel>
-            </Button>
-            <Button Height="30" Width="135" HorizontalAlignment="Right" Style="{StaticResource NormalButtonStyle}" Name="btnAdd" Command="{Binding AddTrendCommand}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="&#xe8fe;" FontFamily="{StaticResource Iconfont}" VerticalAlignment="Center" Margin="3,0"/>
-                    <TextBlock Text="新建趋势图" VerticalAlignment="Center" Margin="3,0"/>
-                </StackPanel>
-            </Button>
-        </StackPanel>
-        <!--#endregion-->
+                <TextBlock Grid.Column="6" Text="{Binding StatusText}" VerticalAlignment="Center"
+                           HorizontalAlignment="Right" Foreground="#7D8795"/>
+            </Grid>
+        </Border>
 
-        <!--#region 第二行 图表-->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="26.5"/>
-                <ColumnDefinition Width="12"/>
-                <ColumnDefinition Width="101.5"/>
-            </Grid.ColumnDefinitions>
-
-            <!--LiveCharts-->
-            <Grid DataContext="{Binding ElementName=lb,Path=SelectedItem}" Name="chart"  Background="#F6F8FE">
+        <Border Grid.Row="2" Background="White" BorderBrush="#E1E6ED"
+                BorderThickness="1" CornerRadius="6" Padding="10">
+            <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="45"/>
+                    <RowDefinition Height="46"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <Border Background="#A9CFF9" Margin="5,5,5,0" CornerRadius="5">
-                    <Border.Effect>
-                        <DropShadowEffect Color="Gray" ShadowDepth="0" BlurRadius="5" Opacity="0.1"/>
-                    </Border.Effect>
-                    <TextBlock Text="{Binding ElementName=lb,Path=SelectedItem.TrendName}" Grid.Row="1"
-                 HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Foreground="#FFF"/>
+
+                <Border Background="#F3F8FE" CornerRadius="5">
+                    <Grid>
+                        <TextBlock Text="{Binding ChartTitle}" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" FontSize="18" Foreground="#409EFE"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                                    VerticalAlignment="Center" Margin="0,0,18,0">
+                            <TextBlock Text="当前值：" Foreground="#7D8795"/>
+                            <TextBlock Text="{Binding CurrentValueText}" FontSize="18"
+                                       FontWeight="SemiBold" Foreground="#333333"/>
+                        </StackPanel>
+                    </Grid>
                 </Border>
 
-                <Border Background="#FCFCFD" Margin="5" CornerRadius="5" Grid.Row="1">
-                    <Border.Effect>
-                        <DropShadowEffect Color="Gray" ShadowDepth="0" BlurRadius="5" Opacity="0.1"/>
-                    </Border.Effect>
-                    <lvc:CartesianChart AxisY="{Binding Path=SelectedItem.YAxis,ElementName=lb}"
-                              AxisX="{Binding ElementName=lb,Path=SelectedItem.XAxis}"
-                              Series="{Binding ElementName=lb,Path=SelectedItem.ChartSeries}"
-                              LegendLocation="{Binding ElementName=lb,Path=SelectedItem.LegendLocation}"
-                     />
-                </Border>
+                <lvc:CartesianChart Grid.Row="1" Margin="4,12,4,4"
+                                    Series="{Binding ChartSeries}"
+                                    LegendLocation="None"
+                                    DisableAnimations="True">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="时间" Labels="{Binding TimeLabels}" LabelsRotation="-25">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator Step="5" StrokeThickness="1" Stroke="#EEF1F5"/>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="数值">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator StrokeThickness="1" Stroke="#EEF1F5"/>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
             </Grid>
-
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right"
-                  Margin="0,10,10,0" >
-                <ToggleButton Content="显示图例" Style="{StaticResource ShowLegendButtonStlye}" Margin="0,0,5,0" IsChecked="{Binding ElementName=lb,Path=SelectedItem.IsShowLegend}" Height="30"/>
-                <Button HorizontalAlignment="Right" VerticalAlignment="Top" Height="30" Width="90" Grid.Row="1"
-                      Style="{StaticResource NormalButtonStyle}" Background="Orange"
-                          Command="{Binding SaveToImageCommand}"
-                          CommandParameter="{Binding ElementName=chart}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xe695;" FontFamily="{StaticResource Iconfont}" VerticalAlignment="Center" Margin="3,0"/>
-                        <TextBlock Text="导出图像" VerticalAlignment="Center" Margin="3,0"/>
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-
-            <!--图表的列表-->
-            <Border Background="#DFFF" Grid.Column="1" CornerRadius="5" Margin="5,5,0,5" Grid.ColumnSpan="3">
-                <Border.Effect>
-                    <DropShadowEffect Color="Gray" ShadowDepth="0" BlurRadius="5" Opacity="0.1"/>
-                </Border.Effect>
-                <ListBox Name="lb" BorderThickness="0" Background="Transparent" SelectedItem="{Binding SelectedTrend, Mode=TwoWay}" ItemsSource="{Binding TrendList}"  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ListBoxItem">
-                                        <Border CornerRadius="3" Background="White" Margin="3" Height="28" Name="bor">
-                                            <ContentPresenter VerticalAlignment="Center"/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="bor" Property="Background" Value="#EEE"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="30"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox Text="{Binding TrendName,UpdateSourceTrigger=PropertyChanged}"
-                               BorderThickness="0" FontSize="12" Background="{x:Null}"
-                               VerticalContentAlignment="Center" Margin="5,0" Foreground="#555"
-                               Style="{x:Null}">
-                                </TextBox>
-                                <Button Grid.Column="1" Style="{StaticResource WindowControlButtonStyle}"
-                              Content="&#xe653;" FontFamily="{StaticResource Iconfont}" Width="20" Height="20"
-                              FontSize="10" CommandParameter="{Binding}"
-                              Command="{Binding DataContext.DelTrendCommand,RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Border>
-        </Grid>
+        </Border>
     </Grid>
 </UserControl>

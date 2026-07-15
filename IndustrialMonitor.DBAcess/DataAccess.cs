@@ -77,35 +77,4 @@ public sealed class DataAccess : IDataAccess
 
     public List<MonitorRecordEntity> GetMonitorRecords() =>
         _context.MonitorRecords.AsNoTracking().ToList();
-
-    public void SaveTrend(
-        List<TrendEntity> trends,
-        List<TrendAxisEntity> axes,
-        List<TrendSectionEntity> sections,
-        List<TrendSeriesEntity> series)
-    {
-        _context.ChangeTracker.Clear();
-
-        _context.TrendSections.RemoveRange(_context.TrendSections);
-        _context.TrendSerieses.RemoveRange(_context.TrendSerieses);
-        _context.TrendAxises.RemoveRange(_context.TrendAxises);
-        _context.Trends.RemoveRange(_context.Trends);
-
-        _context.Trends.AddRange(trends);
-        _context.TrendAxises.AddRange(axes);
-        _context.TrendSections.AddRange(sections);
-        _context.TrendSerieses.AddRange(series);
-        _context.SaveChanges();
-    }
-
-    public List<TrendEntity> GetTrends() => _context.Trends.AsNoTracking().ToList();
-
-    public List<TrendAxisEntity> GetTrendAxises() =>
-        _context.TrendAxises.AsNoTracking().ToList();
-
-    public List<TrendSectionEntity> GetTrendSections() =>
-        _context.TrendSections.AsNoTracking().ToList();
-
-    public List<TrendSeriesEntity> GetTrendSerieses() =>
-        _context.TrendSerieses.AsNoTracking().ToList();
 }

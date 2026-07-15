@@ -21,15 +21,4 @@ public interface IDataAccess
 
     void SaveMonitorRecords(List<MonitorRecordEntity> records);
     List<MonitorRecordEntity> GetMonitorRecords();
-
-    void SaveTrend(
-        List<TrendEntity> trends,
-        List<TrendAxisEntity> axes,
-        List<TrendSectionEntity> sections,
-        List<TrendSeriesEntity> series);
-
-    List<TrendEntity> GetTrends();
-    List<TrendAxisEntity> GetTrendAxises();
-    List<TrendSectionEntity> GetTrendSections();
-    List<TrendSeriesEntity> GetTrendSerieses();
 }

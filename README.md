@@ -3,7 +3,7 @@
 这是一个基于 **WPF、Prism、EF Core 和 Modbus** 的工业设备监控学习项目。界面只保留三个模块：
 
 - **监控**：设备状态、实时变量、手动写入和阈值提示。
-- **趋势**：选择变量并绘制实时曲线。
+- **趋势**：选择一个设备变量，每秒采样并显示最近 60 个数据点。
 - **监控数据**：汇总历史采集记录并导出 Excel。
 
 项目不使用 MQTT。Modbus RTU/TCP 使用 **NModbus 3.0.83** 完成组帧、CRC 和响应解析，项目代码只保留连接管理、设备轮询、地址转换和数据换算。
@@ -14,7 +14,7 @@
 2. `MainUCViewModel`：加载设备、菜单状态、启动和停止采集任务。
 3. `DeviceManageWinViewModel`：维护 RTU/TCP 参数、变量和手动控制。
 4. `Communication`：按 `Protocol` 选择 Modbus RTU 或 Modbus TCP。
-5. `TrendUCViewModel`：使用一个 `DispatcherTimer` 刷新所有曲线。
+5. `TrendUCViewModel`：使用一个 `DispatcherTimer` 刷新单条实时曲线。
 6. `MonitorDataUCViewModel`：统计历史记录并导出 Excel。
 
 ## 主要数据流
@@ -40,7 +40,7 @@ DeviceModel.DeviceVarList 更新实时值
 - ViewModel 不再通过反射创建 `UserControl`，也不使用字符串回调的 `ActionHelper`。
 - 普通窗口、消息提示和保存文件对话框统一通过 `IWindowService` 调用。
 - 命令在构造函数中创建一次，不再在属性 getter 中重复 `new DelegateCommand`。
-- 趋势刷新只使用一个 UI 定时器，不再为每张趋势图创建后台任务。
+- 趋势页不保存复杂配置，只读取通信层已经更新的变量值。
 
 ## 解决方案结构
 
@@ -74,7 +74,7 @@ IndustrialMonitor.slnx
 
 ## 数据库表
 
-当前模型只保留登录、设备通信、监控记录和趋势需要的表：
+当前模型只保留登录、设备通信和监控记录需要的表；实时趋势数据只保存在内存中：
 
 - `monitor_SysUsers`
 - `monitor_Devices`
@@ -83,10 +83,6 @@ IndustrialMonitor.slnx
 - `monitor_ManualControls`
 - `monitor_VarAlarmConfs`
 - `monitor_MonitorRecords`
-- `monitor_Trends`
-- `monitor_TrendAxises`
-- `monitor_TrendSections`
-- `monitor_TrendSerieses`
 
 数据库连接在 `IndustrialMonitor/App.config` 中配置。迁移命令：
 

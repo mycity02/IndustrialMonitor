@@ -1,5 +1,4 @@
 using IndustrialMonitor.Models.Models;
-using IndustrialMonitor.ViewModels.DialogWin;
 using IndustrialMonitor.Views.DeviceWin;
 using IndustrialMonitor.Views.DialogWin;
 using Microsoft.Win32;
@@ -13,12 +12,6 @@ public sealed class WindowService : IWindowService
 
     public void ShowVariableThresholds(DeviceModel device) =>
         ShowDialog(new VariableAlarmConfWin { DataContext = device });
-
-    public void ShowTrendAxisEditor(TrendAxisEditWinViewModel viewModel) =>
-        ShowDialog(new TrendAxisEditWin { DataContext = viewModel });
-
-    public void ShowTrendVariableChooser(TrendDeviceChooseWinViewModel viewModel) =>
-        ShowDialog(new TrendDeviceChooseWin { DataContext = viewModel });
 
     public string? ChooseSaveFile(string title, string filter, string defaultFileName)
     {

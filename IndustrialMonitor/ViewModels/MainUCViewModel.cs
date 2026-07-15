@@ -26,7 +26,6 @@ public sealed class MainUCViewModel : BindableBase, IDialogAware
     private readonly DispatcherTimer _statusTimer;
 
     private CancellationTokenSource _monitorCancellation = new();
-    private ObservableCollection<DeviceModel> _deviceList = [];
     private List<MenuModel> _menuList = [];
     private MenuModel? _selectedMenu;
     private MainPage _currentPage;
@@ -51,11 +50,7 @@ public sealed class MainUCViewModel : BindableBase, IDialogAware
     public DialogCloseListener RequestClose { get; } = new();
     public SysUserModel LoginUserModel { get; private set; } = new();
 
-    public ObservableCollection<DeviceModel> DeviceList
-    {
-        get => _deviceList;
-        private set => SetProperty(ref _deviceList, value);
-    }
+    public ObservableCollection<DeviceModel> DeviceList { get; } = [];
 
     public List<MenuModel> MenuList
     {
@@ -158,7 +153,7 @@ public sealed class MainUCViewModel : BindableBase, IDialogAware
         List<ManualControlEntity> controls = _dataAccess.GetManualControlList();
         List<VarAlarmConfEntity> alarms = _dataAccess.GetVarAlarmConfList();
 
-        DeviceList = new ObservableCollection<DeviceModel>(devices.Select(device => new DeviceModel
+        List<DeviceModel> loadedDevices = devices.Select(device => new DeviceModel
         {
             WriteAction = WriteBytesAsync,
             ComponentType = device.ComponentType,
@@ -201,7 +196,14 @@ public sealed class MainUCViewModel : BindableBase, IDialogAware
                         ControlAddress = control.ControlAddress,
                         ControlValue = control.ControlValue
                     }))
-        }));
+        }).ToList();
+
+        // 保留同一个集合实例，让监控页和趋势页能自动看到设备重新加载。
+        DeviceList.Clear();
+        foreach (DeviceModel device in loadedDevices)
+        {
+            DeviceList.Add(device);
+        }
     }
 
     private void StartMonitoring()
