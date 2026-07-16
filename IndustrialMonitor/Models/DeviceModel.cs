@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 namespace IndustrialMonitor.Models;
 
 /// <summary>
-/// 一台模拟设备的从站地址、连接状态、实时值和写入命令。
+/// 一台模拟设备的从站地址、图片、连接状态、实时值和写入命令。
 /// </summary>
 public sealed class DeviceModel : BindableBase
 {
@@ -18,6 +18,8 @@ public sealed class DeviceModel : BindableBase
     public byte SlaveId { get; set; }
     public string DeviceNum { get; set; } = string.Empty;
     public string DeviceName { get; set; } = string.Empty;
+    public string DeviceImage { get; set; } = string.Empty;
+    public bool HasDeviceImage => !string.IsNullOrWhiteSpace(DeviceImage);
     public ObservableCollection<DeviceVarModel> DeviceVarList { get; set; } = [];
     public ObservableCollection<ManualControlModel> ManualControlList { get; set; } = [];
 

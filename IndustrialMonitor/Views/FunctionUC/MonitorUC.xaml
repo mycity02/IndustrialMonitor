@@ -7,6 +7,24 @@
              d:DesignHeight="720"
              d:DesignWidth="1200"
              Background="#F4F6F8">
+    <UserControl.Resources>
+        <Style x:Key="MetricBorder" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E5E8EC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="18,12"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+        </Style>
+        <Style x:Key="WriteButton" TargetType="Button">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Background" Value="#1677FF"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="22">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -14,23 +32,33 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel>
-            <TextBlock Text="Modbus TCP 设备监控" FontSize="26" FontWeight="SemiBold" Foreground="#202124"/>
-            <TextBlock Text="六台固定模拟设备，每台独立后台轮询；支持读取和写回保持寄存器。"
+        <StackPanel Grid.Row="0" Margin="0,0,0,18">
+            <TextBlock Text="设备监控" FontSize="26" FontWeight="SemiBold" Foreground="#202124"/>
+            <TextBlock Text="六台设备的连接状态、实时通信变量和手动写入。"
                        Margin="0,6,0,0" Foreground="#73777D"/>
         </StackPanel>
 
-        <Border Grid.Row="1" Margin="0,16" Padding="18,10" HorizontalAlignment="Left"
-                Background="White" BorderBrush="#E5E8EC" BorderThickness="1" CornerRadius="8">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="设备数" Foreground="#73777D" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding DeviceList.Count}" FontSize="22" FontWeight="SemiBold"
-                           Foreground="#202124" Margin="18,0,0,0"/>
-            </StackPanel>
-        </Border>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,18">
+            <Border Style="{StaticResource MetricBorder}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="设备数" Foreground="#73777D" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding DeviceList.Count}" FontSize="22" FontWeight="SemiBold"
+                               Foreground="#202124" Margin="18,0,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource MetricBorder}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="通信异常" Foreground="#73777D" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding AbnormalDeviceCount}" FontSize="22" FontWeight="SemiBold"
+                               Foreground="#D4380D" Margin="18,0,0,0"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
 
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding DeviceList}">
+            <ItemsControl ItemsSource="{Binding DeviceList}"
+                          Width="1230"
+                          HorizontalAlignment="Center">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel/>
@@ -38,17 +66,19 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Width="390" MinHeight="310" Margin="0,0,16,16" Padding="18"
-                                Background="White" BorderBrush="#E2E6EA" BorderThickness="1" CornerRadius="8">
+                        <Border Width="390" MinHeight="430" Margin="0,0,16,16" Padding="18"
+                                Background="White" BorderBrush="#E2E6EA"
+                                BorderThickness="1" CornerRadius="8">
                             <Grid>
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <DockPanel>
+                                <DockPanel Grid.Row="0">
                                     <Border DockPanel.Dock="Right" Padding="9,4" CornerRadius="10">
                                         <Border.Style>
                                             <Style TargetType="Border">
@@ -76,15 +106,33 @@
                                         </TextBlock>
                                     </Border>
                                     <StackPanel>
-                                        <TextBlock Text="{Binding DeviceName}" FontSize="18" FontWeight="SemiBold"/>
-                                        <TextBlock Text="{Binding DeviceNum}" FontSize="11" Foreground="#8A8F96" Margin="0,4,0,0"/>
+                                        <TextBlock Text="{Binding DeviceName}" FontSize="18"
+                                                   FontWeight="SemiBold" Foreground="#222222"/>
+                                        <TextBlock Text="{Binding DeviceNum}" FontSize="11"
+                                                   Foreground="#8A8F96" Margin="0,4,0,0"/>
                                     </StackPanel>
                                 </DockPanel>
 
                                 <TextBlock Grid.Row="1" Text="{Binding WarningMsg}" Foreground="#CF1322"
-                                           Margin="0,10,0,0" TextWrapping="Wrap"/>
+                                           Margin="0,10,0,0" TextWrapping="Wrap">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsWarning}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
 
-                                <ItemsControl Grid.Row="2" Margin="0,14,0,10" ItemsSource="{Binding DeviceVarList}">
+                                <Grid Grid.Row="2" Height="120" Margin="0,10,0,12">
+                                    <Image Source="{Binding DeviceImage}" MaxWidth="190" MaxHeight="115"
+                                           Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                </Grid>
+
+                                <ItemsControl Grid.Row="3" ItemsSource="{Binding DeviceVarList}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Margin="0,4">
@@ -96,36 +144,37 @@
                                                     <TextBlock Text="{Binding VarName}" Foreground="#444444"/>
                                                     <TextBlock Text="{Binding VarAddress}" FontSize="10" Foreground="#9A9EA4"/>
                                                 </StackPanel>
-                                                <TextBlock Grid.Column="1" Text="{Binding ReadValue}"
-                                                           FontSize="18" FontWeight="SemiBold" Foreground="#1677FF"
-                                                           VerticalAlignment="Center"/>
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding ReadValue}" FontSize="18"
+                                                               FontWeight="SemiBold" Foreground="#1677FF"/>
+                                                    <TextBlock Text="{Binding VarType}" FontSize="10"
+                                                               Foreground="#9A9EA4" Margin="6,5,0,0"/>
+                                                </StackPanel>
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
 
-                                <StackPanel Grid.Row="3">
-                                    <TextBlock Text="写回保持寄存器" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                    <ItemsControl ItemsSource="{Binding ManualControlList}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal" Margin="0,4,8,0">
-                                                    <TextBox Text="{Binding ControlValue, UpdateSourceTrigger=PropertyChanged}"
-                                                             Width="64" Padding="5,3" Margin="0,0,5,0"/>
-                                                    <Button Content="{Binding ControlName}" Padding="8,4"
-                                                            Command="{Binding DataContext.ManualControlCommand,
-                                                                      RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                            CommandParameter="{Binding}"/>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
+                                <ItemsControl Grid.Row="4" Margin="0,10,0,0" ItemsSource="{Binding ManualControlList}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="0,4,8,0">
+                                                <TextBox Text="{Binding ControlValue, UpdateSourceTrigger=PropertyChanged}"
+                                                         Width="58" Padding="5,4" Margin="0,0,5,0"/>
+                                                <Button Content="{Binding ControlName}"
+                                                        Style="{StaticResource WriteButton}"
+                                                        Command="{Binding DataContext.ManualControlCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </Grid>
                         </Border>
                     </DataTemplate>

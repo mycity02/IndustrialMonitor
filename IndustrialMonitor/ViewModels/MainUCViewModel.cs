@@ -18,14 +18,31 @@ public sealed class MainUCViewModel : BindableBase, IDialogAware
     private const ushort RegisterCount = 4;
     private const int RefreshInterval = 500;
 
+    private static readonly string[] DeviceImages =
+    [
+        "/Resources/Images/Components/air_compressor.png",
+        "/Resources/Images/Components/air_compressor.png",
+        "/Resources/Images/Components/can.png",
+        "/Resources/Images/Components/dryer.png",
+        "/Resources/Images/Components/dryer1.png",
+        "/Resources/Images/Components/filter.png"
+    ];
+
     private readonly ModbusTcpService _modbusService =
         new(SimulatorIp, SimulatorPort, timeout: 2000);
     private readonly List<Task> _monitorTasks = [];
     private CancellationTokenSource _monitorCancellation = new();
+    private int _abnormalDeviceCount;
 
     public string Title => "Modbus 设备监控";
     public DialogCloseListener RequestClose { get; } = new();
     public ObservableCollection<DeviceModel> DeviceList { get; } = [];
+
+    public int AbnormalDeviceCount
+    {
+        get => _abnormalDeviceCount;
+        private set => SetProperty(ref _abnormalDeviceCount, value);
+    }
 
     public bool CanCloseDialog() => true;
 
@@ -54,6 +71,7 @@ public sealed class MainUCViewModel : BindableBase, IDialogAware
                 SlaveId = slaveId,
                 DeviceNum = deviceNum,
                 DeviceName = deviceName,
+                DeviceImage = DeviceImages[slaveId - 1],
                 WriteAction = WriteRegisterAsync,
                 IsWarning = true,
                 WarningMsg = "等待首次 Modbus 响应",
@@ -63,6 +81,8 @@ public sealed class MainUCViewModel : BindableBase, IDialogAware
                     CreateWriteControls())
             });
         }
+
+        RefreshAbnormalDeviceCount();
     }
 
     private static IEnumerable<DeviceVarModel> CreateVariables(
@@ -89,7 +109,6 @@ public sealed class MainUCViewModel : BindableBase, IDialogAware
     private void StartMonitoring()
     {
         CancellationToken token = _monitorCancellation.Token;
-
         foreach (DeviceModel device in DeviceList)
         {
             _monitorTasks.Add(PollDeviceAsync(device, token));
@@ -130,7 +149,7 @@ public sealed class MainUCViewModel : BindableBase, IDialogAware
         }
     }
 
-    private static void ApplyReadValues(DeviceModel device, IReadOnlyList<ushort> values)
+    private void ApplyReadValues(DeviceModel device, IReadOnlyList<ushort> values)
     {
         int valueCount = Math.Min(values.Count, device.DeviceVarList.Count);
         for (int index = 0; index < valueCount; index++)
@@ -140,6 +159,7 @@ public sealed class MainUCViewModel : BindableBase, IDialogAware
 
         device.IsWarning = false;
         device.WarningMsg = string.Empty;
+        RefreshAbnormalDeviceCount();
     }
 
     private async Task WriteRegisterAsync(
@@ -160,6 +180,7 @@ public sealed class MainUCViewModel : BindableBase, IDialogAware
             {
                 device.IsWarning = false;
                 device.WarningMsg = string.Empty;
+                RefreshAbnormalDeviceCount();
             }, CancellationToken.None).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (_monitorCancellation.IsCancellationRequested)
@@ -187,10 +208,16 @@ public sealed class MainUCViewModel : BindableBase, IDialogAware
         return (ushort)(displayAddress - 1);
     }
 
-    private static void SetCommunicationError(DeviceModel device, string message)
+    private void SetCommunicationError(DeviceModel device, string message)
     {
         device.IsWarning = true;
         device.WarningMsg = message;
+        RefreshAbnormalDeviceCount();
+    }
+
+    private void RefreshAbnormalDeviceCount()
+    {
+        AbnormalDeviceCount = DeviceList.Count(device => device.IsWarning);
     }
 
     private static Task RunOnUiAsync(Action action, CancellationToken cancellationToken)

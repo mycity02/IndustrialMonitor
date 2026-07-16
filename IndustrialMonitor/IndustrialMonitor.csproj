@@ -21,8 +21,10 @@
   <ItemGroup>
     <None Remove="Resources\Fonts\iconfont.ttf" />
     <None Remove="Resources\Images\Logo.png" />
+    <None Remove="Resources\Images\Components\*.png" />
     <Resource Include="Resources\Fonts\iconfont.ttf" />
     <Resource Include="Resources\Images\Logo.png" />
+    <Resource Include="Resources\Images\Components\*.png" />
   </ItemGroup>
 
 </Project>
